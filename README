@@ -1,0 +1,3 @@
+Flask App Engine Notify
+
+Flask extension module for working with notifications using the mail & xmpp api's on App Engine.
