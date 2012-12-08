@@ -1,5 +1,5 @@
 """
-  gae_mail
+  gae_notify
   ~~~~~~~~~~~~~~~~~~~
 
   Flask extension module for working with notifications using the mail &
