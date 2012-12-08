@@ -101,35 +101,43 @@ def queue(to, sender, subject, body_text, body_html, method=Method.EMAIL):
     :param body_text: String, plain text body of the message.
     :param body_html: String, HTML body of the message.
   '''
-  return deferred.defer(
-    _send, to, sender, subject, body_text, body_html, method, _queue=QUEUE_NAME)
+  return deferred.defer(_notification_meth_to_send_mapping[method],
+    _send, to, sender, subject, body_text, body_html, _queue=QUEUE_NAME)
 
-def _send(to, sender, subject, body_text, body_html, method=Method.EMAIL):
+_notification_meth_to_send_mapping = {
+  Method.SMS: _send_sms,
+  Method.XMPP: _send_xmpp,
+  Method.EMAIL: _send_email,
+  Method.FLASH: _send_flash,
+}
+
+def _send_email(to, sender, subject, body_text, body_html):
   if to is None:
     raise ValueError('`to` is required.')
-  if method == Method.EMAIL:
-    try:
-      result = mail.EmailMessage(
-        to=to,
-        sender=sender,
-        subject=subject,
-        body=body_text,
-        html=body_html)
-        #headers = {
-        #  "In-Reply-To": email_thread_id,
-        #  "References": email_thread_id,
-        #},
-      result.check_initialized()
-      result.send()
-      return result
-    except:
-      import traceback
-      logging.exception(
-        'Exception sending notification email: %s' % traceback.format_ext())
+  try:
+    result = mail.EmailMessage(
+      to=to,
+      sender=sender,
+      subject=subject,
+      body=body_text,
+      html=body_html)
+      #headers = {
+      #  "In-Reply-To": email_thread_id,
+      #  "References": email_thread_id,
+      #},
+    result.check_initialized()
+    result.send()
+    return result
+  except:
+    import traceback
+    logging.exception(
+      'Exception sending notification email: %s' % traceback.format_ext())
 
-  elif method == Method.SMS:
+def _send_sms(to, sender, subject, body_text, body_html):
     raise NotImplemented()
-  elif method == Method.XMPP:
+
+def _send_xmpp(to, sender, subject, body_text, body_html):
     raise NotImplemented()
-  elif method == Method.FLASH:
+
+def _send_flash(to, sender, subject, body_text, body_html):
     raise NotImplemented()
