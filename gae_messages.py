@@ -1,8 +1,8 @@
 """
-  gae_mail
+  gae_messages
   ~~~~~~~~~~~~~~~~~~~
 
-  Flask extension module for working with notifications using the mail &
+  Flask extension module for working with messages using the mail &
   xmpp api's on App Engine.
 
   :copyright: (c) 2012 by gregorynicholas.
@@ -16,13 +16,13 @@
       'tpl.html': ''
     }))
     tpl = env.get_template("tpl.html")
-    notification = gae_mail.Notification(
+    message = gae_messages.Message(
       name='',
       sender='',
       subject='',
       template_html='',
       template_text='')
-    notification.send('test@gmail.com', {}, method=Method.EMAIL)
+    messages.send('test@gmail.com', {}, method=Method.EMAIL)
 """
 import logging
 from jinja2 import Template
@@ -32,7 +32,8 @@ from google.appengine.ext import deferred
 
 QUEUE_NAME = 'default'
 
-class NotificationTemplate(ndb.Model):
+class MessageTemplate(ndb.Model):
+  '''Data model for storing templates in the datastore.'''
   subject = ndb.StringProperty(indexed=False)
   sender = ndb.StringProperty(indexed=False)
   template_text = ndb.TextProperty(indexed=False)
@@ -44,7 +45,7 @@ class Method:
   EMAIL = 3
   FLASH = 4
 
-class Notification:
+class Message:
   def __init__(self, key_name, sender, subject=None, template_html=None,
     template_text=None, in_reply_to=None):
     '''
@@ -55,7 +56,7 @@ class Notification:
     if isinstance(template_text, Template) and \
        not isinstance(template_html, Template):
       raise ValueError(
-        'notification must have a template an instance of `jinja2.Template`')
+        'message must have a template an instance of `jinja2.Template`')
 
     self.type = type
     self.key_name = key_name
@@ -77,10 +78,10 @@ class Notification:
   def send(self, to, replacements, method=Method.EMAIL):
     '''
     :param to: String, email address of the recipient.
-    :param notification: instance of `Notification`.
     :param replacements: a dict of paramaters to set for the message being sent,
         if one or more required paramaters for the template specified is
         missing a Value Exception will be raised.
+    :param method:
   '''
     if replacements and not isinstance(replacements, dict):
       raise ValueError('`replacements` must be a `dict`.')
@@ -125,7 +126,7 @@ def _send(to, sender, subject, body_text, body_html, method=Method.EMAIL):
     except:
       import traceback
       logging.exception(
-        'Exception sending notification email: %s' % traceback.format_ext())
+        'Exception sending email message: %s' % traceback.format_ext())
 
   elif method == Method.SMS:
     raise NotImplemented()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Flask App Engine Notify documentation build configuration file, created by
+# Flask App Engine Message documentation build configuration file, created by
 # sphinx-quickstart on Thu Dec  6 14:38:14 2012.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -40,7 +40,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Flask App Engine Notify'
+project = u'Flask App Engine Message'
 copyright = u'2012, Gregory Nicholas'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -164,7 +164,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'FlaskAppEngineNotifydoc'
+htmlhelp_basename = 'FlaskAppEngineMessagedoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -183,7 +183,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'FlaskAppEngineNotify.tex', u'Flask App Engine Notify Documentation',
+  ('index', 'FlaskAppEngineMessage.tex', u'Flask App Engine Message Documentation',
    u'Gregory Nicholas', 'manual'),
 ]
 
@@ -213,7 +213,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'flaskappenginenotify', u'Flask App Engine Notify Documentation',
+    ('index', 'flaskappenginemessage', u'Flask App Engine Message Documentation',
      [u'Gregory Nicholas'], 1)
 ]
 
@@ -227,8 +227,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'FlaskAppEngineNotify', u'Flask App Engine Notify Documentation',
-   u'Gregory Nicholas', 'FlaskAppEngineNotify', 'Flask extension module for working with notifications using the mail & xmpp apis on App Engine.',
+  ('index', 'FlaskAppEngineMessage', u'Flask App Engine Message Documentation',
+   u'Gregory Nicholas', 'FlaskAppEngineMessage', 'Flask extension module for working with messages using the mail & xmpp apis on App Engine.',
    'Miscellaneous'),
 ]
 

@@ -1,31 +1,31 @@
 """
-Flask App Engine Notify
+Flask App Engine Messages
 -----------------------
 
-Flask extension module for working with notifications using the mail &
+Flask extension module for working with messages using the mail &
 xmpp api's on App Engine.
 
 Links
 `````
 
-* `documentation <http://packages.python.org/Flask%20App%20Engine%20Upload>`_
+* `documentation <http://packages.python.org/Flask%20App%20Engine%20Messages>`_
 * `development version
-  <http://github.com/gregorynicholas/flask-gae_notify/zipball/master#egg=Flask%20App%20Engine%20Upload-dev>`_
+  <http://github.com/gregorynicholas/flask-gae_messages/zipball/master#egg=Flask%20App%20Engine%20Messages-dev>`_
 
 """
 from setuptools import setup
 
 
 setup(
-  name='Flask App Engine Notify',
+  name='Flask App Engine Messages',
   version='1.0.0',
-  url='http://github.com/gregorynicholas/flask-gae_notify',
+  url='http://github.com/gregorynicholas/flask-gae_messages',
   license='BSD',
   author='gregorynicholas',
-  description='Flask extension module for working with notifications using the \
+  description='Flask extension module for working with messages using the \
 mail & xmpp apis on App Engine.',
   long_description=__doc__,
-  py_modules=['gae_notify'],
+  py_modules=['gae_messages'],
   # packages=['flaskext'],
   # namespace_packages=['flaskext'],
   include_package_data=True,
@@ -35,7 +35,7 @@ mail & xmpp apis on App Engine.',
   install_requires=[
     'Flask'
   ],
-  test_suite='gae_notify_tests',
+  test_suite='gae_messages_tests',
   classifiers=[
     'Development Status :: 4 - Beta',
     'Environment :: Web Environment',
