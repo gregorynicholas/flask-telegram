@@ -7,7 +7,7 @@ except ImportError:
   dev_appserver.fix_sys_path()
 
 import unittest
-import gae_upload
+import gae_messages
 from flask import json
 from flask import Flask, Request
 from flask.testsuite import FlaskTestCase
@@ -30,7 +30,7 @@ app.request_class = _Request
 
 
 @app.route('/test_upload1', methods=['POST', 'OPTIONS', 'HEAD', 'PUT'])
-@gae_upload.upload_blobs()
+@gae_messages.upload_blobs()
 def test_upload1(blobs):
   return json.dumps(blobs.to_dict())
 
@@ -81,6 +81,7 @@ class TestCase(FlaskTestCase):
     self.assertEquals(size, result[0].get('size'))
     # validate the blob_key..
     self.assertTrue(len(result[0].get('blob_key')) > 0)
+
 
 if __name__ == '__main__':
   unittest.main()

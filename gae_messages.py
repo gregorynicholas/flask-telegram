@@ -10,25 +10,31 @@
 
   :usage:
     from jinja2 import Environment
-    from jinja2 import Template
     from jinja2.loaders import DictLoader
     env = Environment(loader=DictLoader({
-      'tpl.html': ''
+      'subject.tpl': '{{var}}',
+      'message.html.tpl': '<html>{{var}}</html>',
+      'message.text.tpl': '{{var}}',
     }))
     tpl = env.get_template("tpl.html")
     message = gae_messages.Message(
-      name='',
-      sender='',
-      subject='',
-      template_html='',
-      template_text='')
-    messages.send('test@gmail.com', {}, method=Method.EMAIL)
+      sender='test@domain.com',
+      subject=env.get_template("subject.tpl"),
+      template_html=env.get_template("message.html.tpl"),
+      template_text=env.get_template("message.text.tpl"))
+    messages.send(
+      to='test@gmail.com',
+      replacements={'var': 'testing'},
+      method=Method.EMAIL)
 """
 import logging
 from jinja2 import Template
 from google.appengine.ext import ndb
 from google.appengine.api import mail
+# from google.appengine.api import xmpp
 from google.appengine.ext import deferred
+
+__all__ = ['QUEUE_NAME', 'MessageTemplate', 'Method', 'Message', 'queue']
 
 QUEUE_NAME = 'default'
 
@@ -46,20 +52,19 @@ class Method:
   FLASH = 4
 
 class Message:
-  def __init__(self, key_name, sender, subject=None, template_html=None,
+  def __init__(self, sender, subject=None, template_html=None,
     template_text=None, in_reply_to=None):
     '''
+      :param sender:
       :param subject: instance of `jinja2.Template`.
       :param template_html: instance of `jinja2.Template`.
       :param template_text: instance of `jinja2.Template`.
+      :param in_reply_to:
     '''
     if isinstance(template_text, Template) and \
        not isinstance(template_html, Template):
       raise ValueError(
         'message must have a template an instance of `jinja2.Template`')
-
-    self.type = type
-    self.key_name = key_name
     self.sender = sender
     self.subject = subject
     self.in_reply_to = in_reply_to
@@ -85,7 +90,7 @@ class Message:
   '''
     if replacements and not isinstance(replacements, dict):
       raise ValueError('`replacements` must be a `dict`.')
-    queue(
+    return queue(
       to=to,
       sender=self.sender,
       subject=self.render_subject(replacements),
@@ -103,14 +108,7 @@ def queue(to, sender, subject, body_text, body_html, method=Method.EMAIL):
     :param body_html: String, HTML body of the message.
   '''
   return deferred.defer(_notification_meth_to_send_mapping[method],
-    _send, to, sender, subject, body_text, body_html, _queue=QUEUE_NAME)
-
-_notification_meth_to_send_mapping = {
-  Method.SMS: _send_sms,
-  Method.XMPP: _send_xmpp,
-  Method.EMAIL: _send_email,
-  Method.FLASH: _send_flash,
-}
+    to, sender, subject, body_text, body_html, _queue=QUEUE_NAME)
 
 def _send_email(to, sender, subject, body_text, body_html):
   if to is None:
@@ -142,3 +140,10 @@ def _send_xmpp(to, sender, subject, body_text, body_html):
 
 def _send_flash(to, sender, subject, body_text, body_html):
     raise NotImplemented()
+
+_notification_meth_to_send_mapping = {
+  Method.SMS: _send_sms,
+  Method.XMPP: _send_xmpp,
+  Method.EMAIL: _send_email,
+  Method.FLASH: _send_flash,
+}

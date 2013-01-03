@@ -26,14 +26,12 @@ setup(
 mail & xmpp apis on App Engine.',
   long_description=__doc__,
   py_modules=['gae_messages'],
-  # packages=['flaskext'],
-  # namespace_packages=['flaskext'],
   include_package_data=True,
   data_files=[],
   zip_safe=False,
   platforms='any',
   install_requires=[
-    'Flask'
+    'flask'
   ],
   test_suite='gae_messages_tests',
   classifiers=[
