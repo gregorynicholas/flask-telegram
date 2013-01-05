@@ -1,8 +1,8 @@
-# Flask App Engine Messages
+# flask-gae_messages
 
 --------------
 
-Flask extension module for working with messages using the mail & xmpp api's on App Engine.
+Flask extension for working with messages using the mail & xmpp apis on App Engine.
 
 ----
 

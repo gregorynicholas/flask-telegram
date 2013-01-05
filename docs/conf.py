@@ -228,7 +228,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'FlaskAppEngineMessage', u'Flask App Engine Message Documentation',
-   u'Gregory Nicholas', 'FlaskAppEngineMessage', 'Flask extension module for working with messages using the mail & xmpp apis on App Engine.',
+   u'Gregory Nicholas', 'FlaskAppEngineMessage', 'Flask extension for working with messages using the mail & xmpp apis on App Engine.',
    'Miscellaneous'),
 ]
 
