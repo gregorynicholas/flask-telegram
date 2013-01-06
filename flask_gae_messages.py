@@ -101,7 +101,8 @@ class Message:
     return self.template_html.render(**context).encode('utf-8')
 
   def send(self, to, context, method=Method.EMAIL, background=True):
-    '''
+    '''Send a message to a designated `to` recipient.
+
       :param to: String, email address of the recipient.
       :param context:
           a ```dict``` of replacements to set for the message being sent, if
@@ -130,7 +131,8 @@ class Message:
 
 
 def queue(to, sender, subject, body_text, body_html, method=Method.EMAIL):
-  '''
+  '''Enqueue a background task to send a message.
+
     :param to: String, address of the recipient.
     :param sender: String, address of the sender.
     :param subject: String, subject of the message.
@@ -142,6 +144,7 @@ def queue(to, sender, subject, body_text, body_html, method=Method.EMAIL):
     to, sender, subject, body_text, body_html, _queue=QUEUE_NAME)
 
 def send_mail(to, sender, subject, body_text, body_html):
+  '''Send a message as an email.'''
   if to is None:
     raise ValueError('`to` is required.')
   try:
@@ -164,13 +167,15 @@ def send_mail(to, sender, subject, body_text, body_html):
       'Exception sending notification email: %s' % tb.format_ext())
 
 def send_sms(to, sender, subject, body_text, body_html):
-    raise NotImplemented()
+  '''Send a message as a sms.'''
+  raise NotImplemented()
 
 def send_xmpp(to, sender, subject, body_text, body_html):
-    raise NotImplemented()
+  '''Send a message as a xmpp.'''
+  raise NotImplemented()
 
 def send_flash(to, sender, subject, body_text, body_html):
-    raise NotImplemented()
+  raise NotImplemented()
 
 _notification_meth_to_send_mapping = {
   Method.SMS: send_sms,
