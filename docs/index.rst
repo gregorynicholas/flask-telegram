@@ -1,22 +1,51 @@
-.. Flask App Engine Message documentation master file, created by
-   sphinx-quickstart on Thu Dec  6 14:38:14 2012.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Flask App Engine Messages
+======================================
 
-Welcome to Flask App Engine Message's documentation!
-===================================================
+Flask extension for working with messages using the mail & xmpp apis on App Engine.
 
-Contents:
-
-.. toctree::
-   :maxdepth: 2
-
-
-
-Indices and tables
-==================
+Links
+-----
 
 * :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+* `documentation <http://packages.python.org/flask-gae_messages>`_
+* `source <http://github.com/gregorynicholas/flask-gae_messages>`_
+* :doc:`changelog </changelog>`
+
+Installing flask-gae_messages
+------------------------------
+
+Install with **pip**
+
+`pip install https://github.com/gregorynicholas/flask-gae_messages/tarball/master`
+
+
+
+
+API
+---
+
+.. module:: flask_gae_messages
+
+.. autoclass:: MessageTemplate
+   :members: sender, subject, template_html, template_text
+
+.. autoclass:: Method
+
+   .. autoattribute: currentmodule
+
+   .. autoattribute: SMS
+   .. autoattribute: XMPP
+   .. autoattribute: EMAIL
+   .. autoattribute: FLASH
+
+
+
+.. autoclass:: Message
+
+   .. automethod:: send(to, context, method=Method.EMAIL)
+
+
+.. autofunction:: queue
+
+.. autofunction:: send_mail
 
