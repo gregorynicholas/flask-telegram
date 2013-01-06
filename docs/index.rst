@@ -1,7 +1,7 @@
 Flask App Engine Messages
 ======================================
 
-Flask extension for working with messages using the mail & xmpp apis on App Engine.
+`Flask`_ extension for working with messages using the mail & xmpp apis on `App Engine`_.
 
 Links
 -----
@@ -16,7 +16,7 @@ Installing flask-gae_messages
 
 Install with **pip**
 
-`pip install https://github.com/gregorynicholas/flask-gae_messages/tarball/master`
+    `pip install https://github.com/gregorynicholas/flask-gae_messages/tarball/master`
 
 
 
@@ -30,14 +30,7 @@ API
    :members: sender, subject, template_html, template_text
 
 .. autoclass:: Method
-
-   .. autoattribute: currentmodule
-
-   .. autoattribute: SMS
-   .. autoattribute: XMPP
-   .. autoattribute: EMAIL
-   .. autoattribute: FLASH
-
+   :members: SMS, XMPP, EMAIL, FLASH
 
 
 .. autoclass:: Message
@@ -49,3 +42,9 @@ API
 
 .. autofunction:: send_mail
 
+.. autofunction:: send_xmpp
+
+.. autofunction:: send_flash
+
+.. _Flask: http://flask.pocoo.org
+.. _App Engine: http://appengine.google.com

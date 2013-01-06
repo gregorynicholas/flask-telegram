@@ -1,5 +1,5 @@
 """
-  gae_messages
+  flask_gae_messages
   ~~~~~~~~~~~~~~~~~~~
 
   Flask extension for working with messages using the mail &
@@ -29,6 +29,13 @@
       method=Method.EMAIL,
       context={'var': 'testing'})
 """
+try:
+  # a hack to see if the app engine sdk is loaded..
+  import yaml
+except ImportError:
+  import dev_appserver
+  dev_appserver.fix_sys_path()
+import blinker
 import logging
 from jinja2 import Template
 from google.appengine.ext import ndb
@@ -43,10 +50,10 @@ QUEUE_NAME = 'default'
 class MessageTemplate(ndb.Model):
   '''Data model for storing templates in the datastore.
 
-    :member sender:
-    :member subject:
-    :member template_html:
-    :member template_text:
+    :param sender: Email address of the sender.
+    :param subject: String.
+    :param template_html: String.
+    :param template_text: String.
   '''
   sender = ndb.StringProperty(indexed=False)
   subject = ndb.StringProperty(indexed=False)
@@ -54,21 +61,26 @@ class MessageTemplate(ndb.Model):
   template_text = ndb.TextProperty(indexed=False)
 
 class Method:
+  '''Enum for the different methods to send a message.'''
+  #:
   SMS = 1
+  #:
   XMPP = 2
+  #:
   EMAIL = 3
+  #:
   FLASH = 4
 
 class Message:
+  '''
+    :param sender: String, email address of the sender.
+    :param subject: instance of ```jinja2.Template```.
+    :param template_html: instance of ```jinja2.Template```.
+    :param template_text: instance of ```jinja2.Template```.
+    :param in_reply_to:
+  '''
   def __init__(self, sender, subject=None, template_html=None,
     template_text=None, in_reply_to=None):
-    '''
-      :param sender:
-      :param subject: instance of ```jinja2.Template```.
-      :param template_html: instance of ```jinja2.Template```.
-      :param template_text: instance of ```jinja2.Template```.
-      :param in_reply_to:
-    '''
     if isinstance(template_text, Template) and \
        not isinstance(template_text, Template):
       raise ValueError(
@@ -88,18 +100,27 @@ class Message:
   def render_body_html(self, context):
     return self.template_html.render(**context).encode('utf-8')
 
-  def send(self, to, context, method=Method.EMAIL):
+  def send(self, to, context, method=Method.EMAIL, background=True):
     '''
       :param to: String, email address of the recipient.
       :param context:
           a ```dict``` of replacements to set for the message being sent, if
           one or more required paramaters for the template specified is missing
           a ```ValueError``` will be raised.
-      :param method:
+      :param method: Enum of the method to send a message.
+      :param background: Send through a background taskqueue.
+
+      :returns:
+          an instance of a ```taskqueue.Task``` object.
     '''
     if context and not isinstance(context, dict):
       raise ValueError('`context` must be a `dict`.')
-    return queue(
+    _execute = None
+    if background:
+      _execute = queue
+    else:
+      _execute = _notification_meth_to_send_mapping[method]
+    return _execute(
       to=to,
       sender=self.sender,
       subject=self.render_subject(context),
@@ -115,6 +136,7 @@ def queue(to, sender, subject, body_text, body_html, method=Method.EMAIL):
     :param subject: String, subject of the message.
     :param body_text: String, plain text body of the message.
     :param body_html: String, HTML body of the message.
+    :param method: Enum of the method to send a message.
   '''
   return deferred.defer(_notification_meth_to_send_mapping[method],
     to, sender, subject, body_text, body_html, _queue=QUEUE_NAME)
@@ -156,3 +178,11 @@ _notification_meth_to_send_mapping = {
   Method.EMAIL: send_mail,
   Method.FLASH: send_flash,
 }
+
+# setup signals..
+
+signals = blinker.Namespace()
+email_dispatched = signals.signal("email-dispatched", doc="""
+Signal sent when an email is dispatched. This signal will also be sent
+in testing mode, even though the email will not actually be sent.
+""")

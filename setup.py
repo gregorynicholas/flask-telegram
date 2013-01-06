@@ -35,11 +35,13 @@ xmpp apis on App Engine.',
   install_requires=[
     'flask',
     'flask_gae_tests',
+    'blinker',
   ],
+  tests_require=['blinker'],
   dependency_links = [
     'https://github.com/gregorynicholas/flask-gae_tests/tarball/master',
   ],
-  test_suite='flask_gae_messages_tests',
+  test_suite='nose.collector',
   classifiers=[
     'Development Status :: 4 - Beta',
     'Environment :: Web Environment',
