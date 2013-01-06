@@ -10,7 +10,7 @@ Flask extension for working with messages using the mail & xmpp apis on App Engi
 `pip install https://github.com/gregorynicholas/flask-gae_messages/tarball/master`
 
 ### usage
-
+    from flask.ext import gae_messages
     from jinja2 import Environment
     from jinja2 import Template
     from jinja2.loaders import DictLoader
@@ -28,5 +28,5 @@ Flask extension for working with messages using the mail & xmpp apis on App Engi
 
     message.send(
       to='test@gmail.com',
-      replacements={'var': 'testing'},
+      context={'var': 'testing'},
       method=Method.EMAIL)

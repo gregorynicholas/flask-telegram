@@ -25,7 +25,7 @@ setup(
   description='Flask extension for working with messages using the mail & \
 xmpp apis on App Engine.',
   long_description=__doc__,
-  py_modules=['gae_messages'],
+  py_modules=['flask_gae_messages'],
   # packages=['flaskext'],
   # namespace_packages=['flaskext'],
   include_package_data=True,
@@ -39,7 +39,7 @@ xmpp apis on App Engine.',
   dependency_links = [
     'https://github.com/gregorynicholas/flask-gae_tests/tarball/master',
   ],
-  test_suite='gae_messages_tests',
+  test_suite='flask_gae_messages_tests',
   classifiers=[
     'Development Status :: 4 - Beta',
     'Environment :: Web Environment',
