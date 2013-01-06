@@ -5,7 +5,7 @@ make html
 
 git checkout gh-pages
 
-mv ./_build/html/* ../*
+cp -rf ./_build/html/* ../*
 
 git add *.html searchindex.js objects.inv .buildinfo _static/ _sources/
 git checkout -m "updated docs html build."
