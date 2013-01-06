@@ -34,10 +34,13 @@ xmpp apis on App Engine.',
   platforms='any',
   install_requires=[
     'flask',
-    'flask_gae_tests',
     'blinker',
   ],
-  tests_require=['blinker'],
+  tests_require=[
+    'nose',
+    'blinker',
+    'flask_gae_tests',
+  ],
   dependency_links = [
     'https://github.com/gregorynicholas/flask-gae_tests/tarball/master',
   ],
