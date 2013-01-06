@@ -2,11 +2,11 @@
   gae_messages
   ~~~~~~~~~~~~~~~~~~~
 
-  Flask extension module for working with messages using the mail &
+  Flask extension for working with messages using the mail &
   xmpp api's on App Engine.
 
   :copyright: (c) 2012 by gregorynicholas.
-  :license: BSD, see LICENSE for more details.
+  :license: MIT, see LICENSE for more details.
 
   :usage:
     from jinja2 import Environment
