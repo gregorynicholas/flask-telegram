@@ -10,6 +10,7 @@
 */
 
 @import url("basic.css");
+@import url(http://fonts.googleapis.com/css?family=Lato:light,regular);
 
 /* -- page layout ----------------------------------------------------------- */
 
@@ -97,7 +98,8 @@ div.body h3,
 div.body h4,
 div.body h5,
 div.body h6 {
-  font-family: 'Garamond', 'Georgia', serif;
+  /*font-family: 'Garamond', 'Georgia', serif;*/
+  font-family: 'Lato', sans-serif;
   font-weight: normal;
   margin: 30px 0px 10px 0px;
   padding: 0;
