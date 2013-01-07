@@ -98,9 +98,10 @@ div.body h3,
 div.body h4,
 div.body h5,
 div.body h6 {
-  /*font-family: 'Garamond', 'Georgia', serif;*/
+  /*font-family: 'Garamond', 'Georgia', serif;
+  font-weight: normal;*/
   font-family: 'Lato', sans-serif;
-  font-weight: normal;
+  font-weight: 300;
   margin: 30px 0px 10px 0px;
   padding: 0;
 }
