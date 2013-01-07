@@ -125,7 +125,8 @@
 <dl class="method">
 <dt id="flask_gae_messages.Message.send">
 <tt class="descname">send</tt><big>(</big><em>to</em>, <em>context</em>, <em>method=Method.EMAIL</em><big>)</big><a class="headerlink" href="#flask_gae_messages.Message.send" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
+<dd><p>Send a message to a designated <cite>to</cite> recipient.</p>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
@@ -151,7 +152,8 @@ a <tt class="docutils literal"><span class="pre">`ValueError`</span></tt> will b
 <dl class="function">
 <dt id="flask_gae_messages.queue">
 <tt class="descclassname">flask_gae_messages.</tt><tt class="descname">queue</tt><big>(</big><em>to</em>, <em>sender</em>, <em>subject</em>, <em>body_text</em>, <em>body_html</em>, <em>method=3</em><big>)</big><a class="headerlink" href="#flask_gae_messages.queue" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
+<dd><p>Enqueue a background task to send a message.</p>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
@@ -172,12 +174,14 @@ a <tt class="docutils literal"><span class="pre">`ValueError`</span></tt> will b
 <dl class="function">
 <dt id="flask_gae_messages.send_mail">
 <tt class="descclassname">flask_gae_messages.</tt><tt class="descname">send_mail</tt><big>(</big><em>to</em>, <em>sender</em>, <em>subject</em>, <em>body_text</em>, <em>body_html</em><big>)</big><a class="headerlink" href="#flask_gae_messages.send_mail" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Send a message as an email.</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="flask_gae_messages.send_xmpp">
 <tt class="descclassname">flask_gae_messages.</tt><tt class="descname">send_xmpp</tt><big>(</big><em>to</em>, <em>sender</em>, <em>subject</em>, <em>body_text</em>, <em>body_html</em><big>)</big><a class="headerlink" href="#flask_gae_messages.send_xmpp" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Send a message as a xmpp.</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="flask_gae_messages.send_flash">

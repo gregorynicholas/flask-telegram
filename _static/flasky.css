@@ -14,7 +14,8 @@
 /* -- page layout ----------------------------------------------------------- */
 
 body {
-  font-family: 'Georgia', serif;
+  /*font-family: 'Georgia', serif;*/
+  font-family: 'Ubuntu', sans-serif;
   font-size: 17px;
   color: #000;
   background: white;
