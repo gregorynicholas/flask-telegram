@@ -42,6 +42,8 @@ API
 
 .. autofunction:: send_mail
 
+.. autofunction:: send_sms
+
 .. autofunction:: send_xmpp
 
 .. autofunction:: send_flash
