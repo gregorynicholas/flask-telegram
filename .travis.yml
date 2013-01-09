@@ -6,7 +6,7 @@ python:
 install:
   - wget https://googleappengine.googlecode.com/files/google_appengine_1.7.4.zip -nv
   - unzip -q google_appengine_1.7.4.zip
-  - export PATH=$PATH:$PWD/google_appengine
+  - export PYTHONPATH=$PYTHONPATH:$PWD/google_appengine
   - pip install -r requirements.txt
 
 script: python ./flask_gae_messages_tests.py
