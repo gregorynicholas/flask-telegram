@@ -4,7 +4,7 @@
 
 Flask extension for working with messages using the mail & xmpp apis on App Engine.
 
-[![Build Status](https://travis-ci.org/gregorynicholas/flask-gae_messages.png?branch=master)](https://travis-ci.org/gregorynicholas/flask-gae_messages)
+[![Build Status](https://secure.travis-ci.org/gregorynicholas/flask-gae_messages.png?branch=master)](https://travis-ci.org/gregorynicholas/flask-gae_messages)
 
 ----
 
