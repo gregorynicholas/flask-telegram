@@ -48,5 +48,8 @@ API
 
 .. autofunction:: send_flash
 
+
+----
+
 .. _Flask: http://flask.pocoo.org
 .. _App Engine: http://appengine.google.com
