@@ -7,8 +7,8 @@ except ImportError:
   dev_appserver.fix_sys_path()
 
 import unittest
-import gae_messages
 from flask.ext import gae_tests
+from flask.ext import gae_messages
 from google.appengine.api import taskqueue
 from jinja2 import Environment
 from jinja2.loaders import DictLoader
