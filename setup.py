@@ -18,7 +18,7 @@ from setuptools import setup
 
 setup(
   name='flask-gae_messages',
-  version='1.0.0',
+  version='1.0.1',
   url='http://github.com/gregorynicholas/flask-gae_messages',
   license='MIT',
   author='gregorynicholas',
