@@ -17,6 +17,13 @@ sys.path.append(os.path.abspath('_themes'))
 html_theme_path = ['_themes']
 html_theme = 'flask'
 
+try:
+  # a hack to see if the app engine sdk is loaded..
+  import yaml
+except ImportError:
+  import dev_appserver
+  dev_appserver.fix_sys_path()
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
