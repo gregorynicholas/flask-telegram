@@ -29,3 +29,9 @@ pip-log.txt
 docs/_build
 docs/build
 .DS_Store
+.nojekyll
+searchindex.js
+objects.inv
+/*.html
+/_static/
+/_sources/
