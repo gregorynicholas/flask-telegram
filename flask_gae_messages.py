@@ -187,7 +187,7 @@ _notification_meth_to_send_mapping = {
 # setup signals..
 
 signals = blinker.Namespace()
-email_dispatched = signals.signal("email-dispatched", doc="""
+email_dispatched = signals.signal("message-dispatched", doc="""
 Signal sent when an email is dispatched. This signal will also be sent
 in testing mode, even though the email will not actually be sent.
 """)
