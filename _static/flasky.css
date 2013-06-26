@@ -258,6 +258,13 @@ table.footnote td {
   padding-top:20px;
 }
 
+
+.field-name,
+.field-body {
+  font-size:0.75em;
+}
+
+
 dl {
   margin: 0;
   padding: 0;
@@ -310,4 +317,8 @@ a:hover tt {
 
 cite {
   font-size: 14px;
+}
+
+.class>dt em {
+  font-size: 0.75em;
 }

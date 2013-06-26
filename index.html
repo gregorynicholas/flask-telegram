@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Flask App Engine Messages &mdash; Flask App Engine Message 1.0.0 documentation</title>
+    <title>flask-telegram &mdash; flask-telegram 0.0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '1.0.0',
+        VERSION:     '0.0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Flask App Engine Message 1.0.0 documentation" href="#" /> 
+    <link rel="top" title="flask-telegram 0.0.1 documentation" href="#" /> 
   </head>
   <body>
   
@@ -38,110 +38,169 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="flask-app-engine-messages">
-<h1>Flask App Engine Messages<a class="headerlink" href="#flask-app-engine-messages" title="Permalink to this headline">¶</a></h1>
-<p><a class="reference external" href="http://flask.pocoo.org">Flask</a> extension for working with messages using the mail &amp; xmpp apis on <a class="reference external" href="http://appengine.google.com">App Engine</a>.</p>
+  <div class="section" id="flask-telegram">
+<h1>flask-telegram<a class="headerlink" href="#flask-telegram" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="http://flask.pocoo.org">Flask</a> extension for delivering messages. send via the <a class="reference external" href="http://appengine.google.com">App Engine</a>
+mail or xmpp apis, and/or other third party providers such as <a class="reference external" href="http://sendgrid.com">Sendgrid</a>.</p>
 <div class="section" id="links">
-<h2>Links<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h2>
+<h2>links<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
-<li><a class="reference external" href="http://packages.python.org/flask-gae_messages">documentation</a></li>
-<li><a class="reference external" href="http://github.com/gregorynicholas/flask-gae_messages">source</a></li>
+<li><a class="reference external" href="http://gregorynicholas.github.io/flask-telegram">documentation</a></li>
+<li><a class="reference external" href="http://packages.python.org/flask-telegram">package</a></li>
+<li><a class="reference external" href="http://github.com/gregorynicholas/flask-telegram">source</a></li>
 <li><a class="reference internal" href="changelog.html"><em>changelog</em></a></li>
 </ul>
 </div>
-<div class="section" id="installing-flask-gae-messages">
-<h2>Installing flask-gae_messages<a class="headerlink" href="#installing-flask-gae-messages" title="Permalink to this headline">¶</a></h2>
-<p>Install with <strong>pip</strong></p>
+<div class="section" id="getting-started">
+<h2>getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
+<p>install with <em>pip</em>:</p>
 <blockquote>
-<div><cite>pip install https://github.com/gregorynicholas/flask-gae_messages/tarball/master</cite></div></blockquote>
+<div>pip install flask-telegram</div></blockquote>
 </div>
-<div class="section" id="module-flask_gae_messages">
-<span id="api"></span><h2>API<a class="headerlink" href="#module-flask_gae_messages" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="example-usage">
+<h2>example usage<a class="headerlink" href="#example-usage" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p><a href="#id1"><span class="problematic" id="id2">`</span></a>from flask.ext import telegram</p>
+<p># setup the jinja templates + environment..
+from jinja2 import Environment, loaders</p>
+<dl class="docutils">
+<dt>jinjaenv = Environment(loader=loaders.DictLoader({</dt>
+<dd>&quot;subject.html&quot;: &quot;{{ var_subject }},&quot;
+&quot;body.html&quot;: &quot;&lt;html&gt;{{ var_html_body }}&lt;/html&gt;,&quot;
+&quot;body.text&quot;: &quot;{{ var_text_body }},&quot;</dd>
+</dl>
+<p>}))</p>
+<p># setup the template..
+messagetemplate = telegram.MessageTemplate(</p>
+<blockquote>
+<div>sender=&quot;<a class="reference external" href="mailto:sender&#37;&#52;&#48;domain&#46;com">sender<span>&#64;</span>domain<span>&#46;</span>com</a>&quot;,
+subject=&quot;subject.html&quot;,
+body_html=&quot;body.html&quot;,
+body_text=&quot;body.html&quot;,
+jinja_env=jinjaenv)</div></blockquote>
+<p># now let's assume you want to batch message recipients..
+receivers = [&quot;<a class="reference external" href="mailto:r1&#37;&#52;&#48;domain&#46;com">r1<span>&#64;</span>domain<span>&#46;</span>com</a>&quot;, &quot;<a class="reference external" href="mailto:r2&#37;&#52;&#48;domain&#46;com">r2<span>&#64;</span>domain<span>&#46;</span>com</a>&quot;, &quot;<a class="reference external" href="mailto:r3&#37;&#52;&#48;domain&#46;com">r3<span>&#64;</span>domain<span>&#46;</span>com</a>&quot;]</p>
+<dl class="docutils">
+<dt>for receiver in receivers:</dt>
+<dd><dl class="first docutils">
+<dt>context = {</dt>
+<dd>&quot;var_subject&quot;: &quot;telegram'd subject&quot;,
+&quot;var_html_body&quot;: &quot;telegram'd html body&quot;,
+&quot;var_text_body&quot;: &quot;telegram'd text body&quot;}</dd>
+</dl>
+<p class="last">message = telegram.Message(messagetemplate)
+message.deliver(receiver=receiver, <a href="#id3"><span class="problematic" id="id4">**</span></a>context)`</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="module-flask_telegram">
+<span id="api"></span><h2>API<a class="headerlink" href="#module-flask_telegram" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="flask_gae_messages.MessageTemplate">
-<em class="property">class </em><tt class="descclassname">flask_gae_messages.</tt><tt class="descname">MessageTemplate</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#flask_gae_messages.MessageTemplate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Data model for storing templates in the datastore.</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dt id="flask_telegram.MessageTemplateMixin">
+<em class="property">class </em><tt class="descclassname">flask_telegram.</tt><tt class="descname">MessageTemplateMixin</tt><big>(</big><em>sender</em>, <em>subject</em>, <em>body_html</em>, <em>body_text</em>, <em>jinja_env=None</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#flask_telegram.MessageTemplateMixin" title="Permalink to this definition">¶</a></dt>
+<dd><p>mixin class for the data model representing message templates.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sender</strong> &#8211; Email address of the sender.</li>
-<li><strong>subject</strong> &#8211; String.</li>
-<li><strong>template_html</strong> &#8211; String.</li>
-<li><strong>template_text</strong> &#8211; String.</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">sender:</th><td class="field-body">string address of the sender</td>
+</tr>
+<tr class="field-even field"><th class="field-name">subject:</th><td class="field-body">string contents of a <cite>jinja2.Template</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">body_html:</th><td class="field-body">string contents of a <cite>jinja2.Template</cite></td>
+</tr>
+<tr class="field-even field"><th class="field-name">body_text:</th><td class="field-body">string contents of a <cite>jinja2.Template</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">jinja_env:</th><td class="field-body">instance of <cite>jinja2.Environment</cite></td>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-<dl class="class">
-<dt id="flask_gae_messages.Method">
-<em class="property">class </em><tt class="descclassname">flask_gae_messages.</tt><tt class="descname">Method</tt><a class="headerlink" href="#flask_gae_messages.Method" title="Permalink to this definition">¶</a></dt>
-<dd><p>Enum for the different methods to send a message.</p>
-<dl class="attribute">
-<dt id="flask_gae_messages.Method.SMS">
-<tt class="descname">SMS</tt><em class="property"> = 1</em><a class="headerlink" href="#flask_gae_messages.Method.SMS" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="flask_gae_messages.Method.XMPP">
-<tt class="descname">XMPP</tt><em class="property"> = 2</em><a class="headerlink" href="#flask_gae_messages.Method.XMPP" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="flask_gae_messages.Method.EMAIL">
-<tt class="descname">EMAIL</tt><em class="property"> = 3</em><a class="headerlink" href="#flask_gae_messages.Method.EMAIL" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="flask_gae_messages.Method.FLASH">
-<tt class="descname">FLASH</tt><em class="property"> = 4</em><a class="headerlink" href="#flask_gae_messages.Method.FLASH" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="flask_gae_messages.Message">
-<em class="property">class </em><tt class="descclassname">flask_gae_messages.</tt><tt class="descname">Message</tt><big>(</big><em>sender</em>, <em>subject=None</em>, <em>template_html=None</em>, <em>template_text=None</em>, <em>in_reply_to=None</em><big>)</big><a class="headerlink" href="#flask_gae_messages.Message" title="Permalink to this definition">¶</a></dt>
+</div></blockquote>
+<dl class="method">
+<dt id="flask_telegram.MessageTemplateMixin.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>sender</em>, <em>subject</em>, <em>body_html</em>, <em>body_text</em>, <em>jinja_env</em><big>)</big><a class="headerlink" href="#flask_telegram.MessageTemplateMixin.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sender</strong> &#8211; String, email address of the sender.</li>
-<li><strong>subject</strong> &#8211; instance of <tt class="docutils literal"><span class="pre">`jinja2.Template`</span></tt>.</li>
-<li><strong>template_html</strong> &#8211; instance of <tt class="docutils literal"><span class="pre">`jinja2.Template`</span></tt>.</li>
-<li><strong>template_text</strong> &#8211; instance of <tt class="docutils literal"><span class="pre">`jinja2.Template`</span></tt>.</li>
-<li><strong>in_reply_to</strong> &#8211; </li>
+<li><strong>sender</strong> -- string address of the sender</li>
+<li><strong>subject</strong> -- string contents of a <cite>jinja2.Template</cite></li>
+<li><strong>body_html</strong> -- string contents of a <cite>jinja2.Template</cite></li>
+<li><strong>body_text</strong> -- string contents of a <cite>jinja2.Template</cite></li>
+<li><strong>jinja_env</strong> -- instance of <cite>jinja2.Environment</cite></li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
 <dl class="method">
-<dt id="flask_gae_messages.Message.send">
-<tt class="descname">send</tt><big>(</big><em>to</em>, <em>context</em>, <em>method=Method.EMAIL</em><big>)</big><a class="headerlink" href="#flask_gae_messages.Message.send" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a message to a designated <cite>to</cite> recipient.</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dt id="flask_telegram.MessageTemplateMixin.render_subject">
+<tt class="descname">render_subject</tt><big>(</big><em>context</em><big>)</big><a class="headerlink" href="#flask_telegram.MessageTemplateMixin.render_subject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="flask_telegram.MessageTemplateMixin.render_body_text">
+<tt class="descname">render_body_text</tt><big>(</big><em>context</em><big>)</big><a class="headerlink" href="#flask_telegram.MessageTemplateMixin.render_body_text" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="flask_telegram.MessageTemplateMixin.render_body_html">
+<tt class="descname">render_body_html</tt><big>(</big><em>context</em><big>)</big><a class="headerlink" href="#flask_telegram.MessageTemplateMixin.render_body_html" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="flask_telegram.MessageTemplateMixin.sender">
+<tt class="descname">sender</tt><a class="headerlink" href="#flask_telegram.MessageTemplateMixin.sender" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>to</strong> &#8211; String, email address of the recipient.</li>
-<li><strong>context</strong> &#8211; a <tt class="docutils literal"><span class="pre">`dict`</span></tt> of replacements to set for the message being sent, if
-one or more required paramaters for the template specified is missing
-a <tt class="docutils literal"><span class="pre">`ValueError`</span></tt> will be raised.</li>
-<li><strong>method</strong> &#8211; Enum of the method to send a message.</li>
-<li><strong>background</strong> &#8211; Send through a background taskqueue.</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">string address of the sender</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">an instance of a <tt class="docutils literal"><span class="pre">`taskqueue.Task`</span></tt> object.</p>
-</td>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="flask_telegram.MessageTemplateMixin.subject_template">
+<tt class="descname">subject_template</tt><a class="headerlink" href="#flask_telegram.MessageTemplateMixin.subject_template" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">instance of <cite>jinja2.Template</cite></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="flask_telegram.MessageTemplateMixin.body_html_template">
+<tt class="descname">body_html_template</tt><a class="headerlink" href="#flask_telegram.MessageTemplateMixin.body_html_template" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">instance of <cite>jinja2.Template</cite></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="flask_telegram.MessageTemplateMixin.body_text_template">
+<tt class="descname">body_text_template</tt><a class="headerlink" href="#flask_telegram.MessageTemplateMixin.body_text_template" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">instance of <cite>jinja2.Template</cite></td>
 </tr>
 </tbody>
 </table>
@@ -149,21 +208,83 @@ a <tt class="docutils literal"><span class="pre">`ValueError`</span></tt> will b
 
 </dd></dl>
 
-<dl class="function">
-<dt id="flask_gae_messages.queue">
-<tt class="descclassname">flask_gae_messages.</tt><tt class="descname">queue</tt><big>(</big><em>to</em>, <em>sender</em>, <em>subject</em>, <em>body_text</em>, <em>body_html</em>, <em>method=3</em><big>)</big><a class="headerlink" href="#flask_gae_messages.queue" title="Permalink to this definition">¶</a></dt>
-<dd><p>Enqueue a background task to send a message.</p>
+<dl class="class">
+<dt id="flask_telegram.Message">
+<em class="property">class </em><tt class="descclassname">flask_telegram.</tt><tt class="descname">Message</tt><big>(</big><em>template</em><big>)</big><a class="headerlink" href="#flask_telegram.Message" title="Permalink to this definition">¶</a></dt>
+<dd><p>base class for a mesasage to send.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">template:</th><td class="field-body">instance of a <cite>MessageTemplateMixin</cite> subclass</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<dl class="method">
+<dt id="flask_telegram.Message.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>template</em><big>)</big><a class="headerlink" href="#flask_telegram.Message.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>template</strong> -- instance of a <cite>MessageTemplateMixin</cite> subclass</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="flask_telegram.Message.deliver">
+<tt class="descname">deliver</tt><big>(</big><em>receiver</em>, <em>sender</em>, <em>in_reply_to</em>, <em>method=Method.GAEMAIL</em>, <em>as_task=True</em>, <em>taskqueue=TASKQUEUE_NAME</em>, <em>**context</em><big>)</big><a class="headerlink" href="#flask_telegram.Message.deliver" title="Permalink to this definition">¶</a></dt>
+<dd><p>deliver message to a recipient.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param receiver:</th><td class="field-body">string address of the recipient</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param sender:</th><td class="field-body">string address of the sender</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">param in_reply_to:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">string id of a conversation thread to reference</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">param references:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">reference of a conversation thread</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">param method:</th><td class="field-body">enum of the DeliveryMethod to transport a message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param as_task:</th><td class="field-body">boolean flag to send through app engine's taskqueue api</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">param taskqueue:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">string for the taskqueue name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param context:</th><td class="field-body">dict of replacements to set for the message being sent, if one or more required paramaters for the template specified is missing, raises a <cite>ValueError</cite></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">deliver</tt><big>(</big><em>receiver</em>, <em>sender=None</em>, <em>in_reply_to=None</em>, <em>references=None</em>, <em>method=31</em>, <em>as_task=True</em>, <em>taskqueue='default'</em>, <em>**context</em><big>)</big></dt>
+<dd><p>deliver message to a recipient.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>to</strong> &#8211; String, address of the recipient.</li>
-<li><strong>sender</strong> &#8211; String, address of the sender.</li>
-<li><strong>subject</strong> &#8211; String, subject of the message.</li>
-<li><strong>body_text</strong> &#8211; String, plain text body of the message.</li>
-<li><strong>body_html</strong> &#8211; String, HTML body of the message.</li>
-<li><strong>method</strong> &#8211; Enum of the method to send a message.</li>
+<li><strong>receiver</strong> -- string address of the recipient</li>
+<li><strong>sender</strong> -- string address of the sender</li>
+<li><strong>in_reply_to</strong> -- string id of a conversation thread to reference</li>
+<li><strong>references</strong> -- reference of a conversation thread</li>
+<li><strong>method</strong> -- enum of the DeliveryMethod to transport a message</li>
+<li><strong>as_task</strong> -- boolean flag to send through app engine's taskqueue api</li>
+<li><strong>taskqueue</strong> -- string for the taskqueue name</li>
+<li><strong>context</strong> -- dict of replacements to set for the message being sent, if one or more required paramaters for the template specified is missing, raises a <cite>ValueError</cite></li>
 </ul>
 </td>
 </tr>
@@ -171,29 +292,143 @@ a <tt class="docutils literal"><span class="pre">`ValueError`</span></tt> will b
 </table>
 </dd></dl>
 
-<dl class="function">
-<dt id="flask_gae_messages.send_mail">
-<tt class="descclassname">flask_gae_messages.</tt><tt class="descname">send_mail</tt><big>(</big><em>to</em>, <em>sender</em>, <em>subject</em>, <em>body_text</em>, <em>body_html</em><big>)</big><a class="headerlink" href="#flask_gae_messages.send_mail" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a message as an email.</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="flask_gae_messages.send_sms">
-<tt class="descclassname">flask_gae_messages.</tt><tt class="descname">send_sms</tt><big>(</big><em>to</em>, <em>sender</em>, <em>subject</em>, <em>body_text</em>, <em>body_html</em><big>)</big><a class="headerlink" href="#flask_gae_messages.send_sms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a message as a sms.</p>
+<dl class="class">
+<dt id="flask_telegram.MessageTransport">
+<em class="property">class </em><tt class="descclassname">flask_telegram.</tt><tt class="descname">MessageTransport</tt><big>(</big><em>sender</em>, <em>receiver</em>, <em>subject</em>, <em>body_html</em>, <em>body_text</em>, <em>in_reply_to</em>, <em>references</em>, <em>context</em>, <em>as_task</em>, <em>taskqueue</em><big>)</big><a class="headerlink" href="#flask_telegram.MessageTransport" title="Permalink to this definition">¶</a></dt>
+<dd><p>class for a captured result of a message delivery dispatch.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param sender:</th><td class="field-body">string address of the sender</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param receiver:</th><td class="field-body">string address of the recipient</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">param subject:</th><td class="field-body">string subject of the message</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">param body_text:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">string plain text body of the message</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">param body_html:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">string html body of the message</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">param in_reply_to:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">string id of a conversation thread to reference</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">param references:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">reference of a conversation thread</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param context:</th><td class="field-body">dict of replacements to set for the message being sent</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">param as_task:</th><td class="field-body">boolean flag to send through app engine's taskqueue api</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">param taskqueue:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">string name of the taskqueue</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
 </dd></dl>
 
-<dl class="function">
-<dt id="flask_gae_messages.send_xmpp">
-<tt class="descclassname">flask_gae_messages.</tt><tt class="descname">send_xmpp</tt><big>(</big><em>to</em>, <em>sender</em>, <em>subject</em>, <em>body_text</em>, <em>body_html</em><big>)</big><a class="headerlink" href="#flask_gae_messages.send_xmpp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a message as a xmpp.</p>
+<dl class="class">
+<dt id="flask_telegram.MessageTransporter">
+<em class="property">class </em><tt class="descclassname">flask_telegram.</tt><tt class="descname">MessageTransporter</tt><a class="headerlink" href="#flask_telegram.MessageTransporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>abstract class interface to transport a message.</p>
+<dl class="method">
+<dt id="flask_telegram.MessageTransporter.send">
+<tt class="descname">send</tt><big>(</big><em>message_transport</em><big>)</big><a class="headerlink" href="#flask_telegram.MessageTransporter.send" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>message_transport</strong> -- instance of a <cite>MessageTransport</cite></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
-<dl class="function">
-<dt id="flask_gae_messages.send_flash">
-<tt class="descclassname">flask_gae_messages.</tt><tt class="descname">send_flash</tt><big>(</big><em>to</em>, <em>sender</em>, <em>subject</em>, <em>body_text</em>, <em>body_html</em><big>)</big><a class="headerlink" href="#flask_gae_messages.send_flash" title="Permalink to this definition">¶</a></dt>
+</dd></dl>
+
+<dl class="class">
+<dt id="flask_telegram.FlaskFlashMessageTransporter">
+<em class="property">class </em><tt class="descclassname">flask_telegram.</tt><tt class="descname">FlaskFlashMessageTransporter</tt><a class="headerlink" href="#flask_telegram.FlaskFlashMessageTransporter" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="flask_telegram.FlaskFlashMessageTransporter.send">
+<tt class="descname">send</tt><big>(</big><em>message_transport</em><big>)</big><a class="headerlink" href="#flask_telegram.FlaskFlashMessageTransporter.send" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+<dl class="class">
+<dt id="flask_telegram.GAEMailMessageTransporter">
+<em class="property">class </em><tt class="descclassname">flask_telegram.</tt><tt class="descname">GAEMailMessageTransporter</tt><a class="headerlink" href="#flask_telegram.GAEMailMessageTransporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>send messages through google app engine's mail api.</p>
+<dl class="method">
+<dt id="flask_telegram.GAEMailMessageTransporter.send">
+<tt class="descname">send</tt><big>(</big><em>message_transport</em><big>)</big><a class="headerlink" href="#flask_telegram.GAEMailMessageTransporter.send" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>message_transport</strong> -- instance of a <cite>MessageTransport</cite></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="flask_telegram.GAEXMPPMessageTransporter">
+<em class="property">class </em><tt class="descclassname">flask_telegram.</tt><tt class="descname">GAEXMPPMessageTransporter</tt><a class="headerlink" href="#flask_telegram.GAEXMPPMessageTransporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>send a message through google app engine's xmpp api.</p>
+<dl class="method">
+<dt id="flask_telegram.GAEXMPPMessageTransporter.send">
+<tt class="descname">send</tt><big>(</big><em>message_transport</em><big>)</big><a class="headerlink" href="#flask_telegram.GAEXMPPMessageTransporter.send" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="flask_telegram.SendgridMessageTransporter">
+<em class="property">class </em><tt class="descclassname">flask_telegram.</tt><tt class="descname">SendgridMessageTransporter</tt><a class="headerlink" href="#flask_telegram.SendgridMessageTransporter" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="flask_telegram.SendgridMessageTransporter.send">
+<tt class="descname">send</tt><big>(</big><em>message_transport</em><big>)</big><a class="headerlink" href="#flask_telegram.SendgridMessageTransporter.send" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="flask_telegram.DeliveryMethod">
+<em class="property">class </em><tt class="descclassname">flask_telegram.</tt><tt class="descname">DeliveryMethod</tt><a class="headerlink" href="#flask_telegram.DeliveryMethod" title="Permalink to this definition">¶</a></dt>
+<dd><p>enum for the different methods to send a message.</p>
+<dl class="attribute">
+<dt id="flask_telegram.DeliveryMethod.FLASKFLASH">
+<tt class="descname">FLASKFLASH</tt><em class="property"> = 10</em><a class="headerlink" href="#flask_telegram.DeliveryMethod.FLASKFLASH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="flask_telegram.DeliveryMethod.GAEXMPP">
+<tt class="descname">GAEXMPP</tt><em class="property"> = 30</em><a class="headerlink" href="#flask_telegram.DeliveryMethod.GAEXMPP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="flask_telegram.DeliveryMethod.GAEMAIL">
+<tt class="descname">GAEMAIL</tt><em class="property"> = 31</em><a class="headerlink" href="#flask_telegram.DeliveryMethod.GAEMAIL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="flask_telegram.DeliveryMethod.SENDGRID">
+<tt class="descname">SENDGRID</tt><em class="property"> = 50</em><a class="headerlink" href="#flask_telegram.DeliveryMethod.SENDGRID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<hr class="docutils" />
 </div>
 </div>
 
@@ -204,7 +439,7 @@ a <tt class="docutils literal"><span class="pre">`ValueError`</span></tt> will b
       <div class="clearer"></div>
     </div>
   
-    <a href="http://github.com/gregorynicholas/flask-gae_messages"><img style="position: fixed; top: 0; right: 0; border: 0;"
+    <a href="http://github.com/gregorynicholas/flask-telegram"><img style="position: fixed; top: 0; right: 0; border: 0;"
     src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
   
 
