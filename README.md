@@ -1,5 +1,5 @@
 flask-telegram
-~~~~~~~~~~~~~~
+==============
 
 [flask](http://flask.pocoo.org) extension for delivering messages.
 send via [app engine's](http://appengine.google.com) mail or xmpp
