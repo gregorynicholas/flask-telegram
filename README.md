@@ -1,34 +1,58 @@
-# flask-gae_messages
+flask-telegram
+~~~~~~~~~~~~~~
 
---------------
+[flask](http://flask.pocoo.org) extension for delivering messages.
+send via [app engine's](http://appengine.google.com) mail or xmpp
+apis, and/or other third party providers such as
+[sendgrid](http://sendgrid.com).
 
-Flask extension for working with messages using the mail & xmpp apis on App Engine.
+[![Build Status](https://secure.travis-ci.org/gregorynicholas/flask-telegram.png?branch=master)](https://travis-ci.org/gregorynicholas/flask-telegram)
 
-[![Build Status](https://secure.travis-ci.org/gregorynicholas/flask-gae_messages.png?branch=master)](https://travis-ci.org/gregorynicholas/flask-gae_messages)
 
-----
+* [docs](http://gregorynicholas.github.io/flask-telegram)
+* [package](http://packages.python.org/flask-telegram)
+* [changelog](https://github.com/gregorynicholas/flask-telegram/blob/master/CHANGES)
 
-### install with pip
-`pip install https://github.com/gregorynicholas/flask-gae_messages/tarball/master`
 
-### usage
-    from flask.ext import gae_messages
-    from jinja2 import Environment
-    from jinja2 import Template
-    from jinja2.loaders import DictLoader
-    env = Environment(loader=DictLoader({
-      'subject.tpl': '{{var}}',
-      'message.html.tpl': '<html>{{var}}</html>',
-      'message.text.tpl': '{{var}}',
+-----
+
+
+### getting started
+
+install with *pip*:
+
+    pip install flask-telegram
+
+
+### example usage
+
+    from flask.ext import telegram
+
+    # setup the jinja templates + environment..
+    from jinja2 import Environment, loaders
+
+    jinjaenv = Environment(loader=loaders.DictLoader({
+      "subject.html": "{{ var_subject }},"
+      "body.html": "<html>{{ var_html_body }}</html>,"
+      "body.text": "{{ var_text_body }},"
     }))
 
-    message = gae_messages.Message(
-      sender='test@domain.com',
-      subject=env.get_template("subject.tpl"),
-      template_html=env.get_template("message.html.tpl"),
-      template_text=env.get_template("message.text.tpl"))
+    # setup the template..
+    messagetemplate = telegram.MessageTemplate(
+      sender="sender@domain.com",
+      subject="subject.html",
+      body_html="body.html",
+      body_text="body.html",
+      jinja_env=jinjaenv)
 
-    message.send(
-      to='test@gmail.com',
-      context={'var': 'testing'},
-      method=Method.EMAIL)
+    # now let's assume you want to batch message recipients..
+    receivers = ["r1@domain.com", "r2@domain.com", "r3@domain.com"]
+
+    for receiver in receivers:
+      context = {
+        "var_subject": "telegram'd subject",
+        "var_html_body": "telegram'd html body",
+        "var_text_body": "telegram'd text body"}
+
+      message = telegram.Message(messagetemplate)
+      message.deliver(receiver=receiver, **context)

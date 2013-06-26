@@ -9,7 +9,7 @@ install:
   - export PYTHONPATH=$PYTHONPATH:$PWD/google_appengine
   - pip install -r requirements.txt
 
-script: python ./flask_gae_messages_tests.py
+script: python setup.py test
 
 branches:
   only:

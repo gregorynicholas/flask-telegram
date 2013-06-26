@@ -1,55 +1,125 @@
-Flask App Engine Messages
-======================================
+flask-telegram
+==============
 
-`Flask`_ extension for working with messages using the mail & xmpp apis on `App Engine`_.
+`Flask`_ extension for delivering messages. send via google's `App Engine`_
+mail or xmpp apis, and/or other third party providers such as `Sendgrid`_.
 
-Links
+
+links
 -----
 
 * :ref:`genindex`
-* `documentation <http://packages.python.org/flask-gae_messages>`_
-* `source <http://github.com/gregorynicholas/flask-gae_messages>`_
+* `documentation <http://gregorynicholas.github.io/flask-telegram>`_
+* `package <http://packages.python.org/flask-telegram>`_
+* `source <http://github.com/gregorynicholas/flask-telegram>`_
 * :doc:`changelog </changelog>`
 
-Installing flask-gae_messages
-------------------------------
 
-Install with **pip**
+getting started
+---------------
 
-    `pip install https://github.com/gregorynicholas/flask-gae_messages/tarball/master`
+install with *pip*:
 
+    pip install flask-telegram
+
+
+example usage
+-------------
+
+
+
+    `from flask.ext import telegram
+
+    # setup the jinja templates + environment..
+    from jinja2 import Environment, loaders
+
+    jinjaenv = Environment(loader=loaders.DictLoader({
+      "subject.html": "{{ var_subject }},"
+      "body.html": "<html>{{ var_html_body }}</html>,"
+      "body.text": "{{ var_text_body }},"
+    }))
+
+    # setup the template..
+    messagetemplate = telegram.MessageTemplate(
+      sender="sender@domain.com",
+      subject="subject.html",
+      body_html="body.html",
+      body_text="body.html",
+      jinja_env=jinjaenv)
+
+    # now let's assume you want to batch message recipients..
+    receivers = ["r1@domain.com", "r2@domain.com", "r3@domain.com"]
+
+    for receiver in receivers:
+      context = {
+        "var_subject": "telegram'd subject",
+        "var_html_body": "telegram'd html body",
+        "var_text_body": "telegram'd text body"}
+
+      message = telegram.Message(messagetemplate)
+      message.deliver(receiver=receiver, **context)`
 
 
 
 API
 ---
 
-.. module:: flask_gae_messages
+.. module:: flask_telegram
 
-.. autoclass:: MessageTemplate
-   :members: sender, subject, template_html, template_text
 
-.. autoclass:: Method
-   :members: SMS, XMPP, EMAIL, FLASH
+.. autoclass:: MessageTemplateMixin
+   :members: sender, subject_template, body_html_template, body_text_template
+
+   .. automethod:: __init__(sender, subject, body_html, body_text, jinja_env)
+   .. automethod:: render_subject(context)
+   .. automethod:: render_body_text(context)
+   .. automethod:: render_body_html(context)
 
 
 .. autoclass:: Message
+   :members:
 
-   .. automethod:: send(to, context, method=Method.EMAIL)
+   .. automethod:: __init__(template)
+
+   .. automethod:: deliver(receiver, sender, in_reply_to, method=Method.GAEMAIL, as_task=True, taskqueue=TASKQUEUE_NAME, **context)
 
 
-.. autofunction:: queue
+.. autoclass:: MessageTransport
+    :members: sender, receiver, subject, body_html, body_text, in_reply_to, references, context, as_task, taskqueue
 
-.. autofunction:: send_mail
 
-.. autofunction:: send_sms
+.. autoclass:: MessageTransporter
 
-.. autofunction:: send_xmpp
+   .. automethod:: send(message_transport)
 
-.. autofunction:: send_flash
+
+.. autoclass:: FlaskFlashMessageTransporter
+
+   .. automethod:: send(message_transport)
+
+
+.. autoclass:: GAEMailMessageTransporter
+
+   .. automethod:: send(message_transport)
+
+
+.. autoclass:: GAEXMPPMessageTransporter
+
+   .. automethod:: send(message_transport)
+
+
+.. autoclass:: SendgridMessageTransporter
+
+   .. automethod:: send(message_transport)
+
+
+.. autoclass:: DeliveryMethod
+   :members: FLASKFLASH, GAEXMPP, GAEMAIL, SENDGRID
+
 
 
 ----
 
 .. _Flask: http://flask.pocoo.org
 .. _App Engine: http://appengine.google.com
+.. _Sendgrid: http://sendgrid.com
