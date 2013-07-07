@@ -1,8 +1,9 @@
 flask-telegram
 ==============
 
+
 [flask](http://flask.pocoo.org) extension for delivering messages.
-send via [app engine's](http://appengine.google.com) mail or xmpp
+send via google [app engine's](http://appengine.google.com) mail or xmpp
 apis, and/or other third party providers such as
 [sendgrid](http://sendgrid.com).
 
@@ -10,8 +11,10 @@ apis, and/or other third party providers such as
 
 
 * [docs](http://gregorynicholas.github.io/flask-telegram)
+* [source](http://github.com/gregorynicholas/flask-telegram)
 * [package](http://packages.python.org/flask-telegram)
 * [changelog](https://github.com/gregorynicholas/flask-telegram/blob/master/CHANGES)
+* [travis-ci](http://travis-ci.org/gregorynicholas/flask-telegram)
 
 
 -----
@@ -22,6 +25,17 @@ apis, and/or other third party providers such as
 install with *pip*:
 
     pip install flask-telegram
+
+
+-----
+
+
+### features
+
+* [todo]
+
+
+-----
 
 
 ### example usage

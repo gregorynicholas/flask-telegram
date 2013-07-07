@@ -12,6 +12,7 @@ links
 * `documentation <http://gregorynicholas.github.io/flask-telegram>`_
 * `package <http://packages.python.org/flask-telegram>`_
 * `source <http://github.com/gregorynicholas/flask-telegram>`_
+* `travis-ci <http://travis-ci.org/gregorynicholas/flask-telegram>`_
 * :doc:`changelog </changelog>`
 
 
@@ -25,8 +26,6 @@ install with *pip*:
 
 example usage
 -------------
-
-
 
     `from flask.ext import telegram
 
@@ -60,8 +59,7 @@ example usage
       message.deliver(receiver=receiver, **context)`
 
 
-
-API
+api
 ---
 
 .. module:: flask_telegram
@@ -115,7 +113,6 @@ API
 
 .. autoclass:: DeliveryMethod
    :members: FLASKFLASH, GAEXMPP, GAEMAIL, SENDGRID
-
 
 
 ----
