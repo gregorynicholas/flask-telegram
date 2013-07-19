@@ -40,6 +40,8 @@ install with *pip*:
 
 ### example usage
 
+setup from outside the flask app request context:
+
     from flask.ext import telegram
 
     # setup the jinja templates + environment..
@@ -70,3 +72,8 @@ install with *pip*:
 
       message = telegram.Message(messagetemplate)
       message.deliver(receiver=receiver, **context)
+
+
+setup from within the flask app request context:
+
+    [todo]
