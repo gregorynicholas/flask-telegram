@@ -25,16 +25,15 @@ try:
 except ImportError:
   _signals = False
 
-import logging
+from logging import getLogger
 from jinja2 import Template
 from google.appengine.api import mail
 from google.appengine.ext import deferred
 # from google.appengine.api import xmpp
 
 
-__all__ = [
-  "MessageTemplateMixin", "Message", "DeliveryMethod",
-]
+__all__ = ["MessageTemplateMixin", "Message", "DeliveryMethod"]
+logger = getLogger(__name__)
 
 
 #:
@@ -188,6 +187,7 @@ class Message(object):
       sender = self.template.sender
 
     transporter = method_to_transporter_mapping[method]()
+
     rv = MessageTransport(
       sender=sender,
       receiver=receiver,
@@ -199,6 +199,11 @@ class Message(object):
       context=context,
       as_task=as_task,
       taskqueue=taskqueue)
+
+    logger.info(
+      "telegram.deliver: transorter: %s, receiver: %s, sender: %s, "
+      "context: %s, rv: %s",
+      transporter, receiver, sender, context, rv)
 
     # dispatch signal event hook..
     if _signals:
@@ -245,43 +250,50 @@ class MessageTransporter(object):
   abstract class interface to transport a message.
   """
 
-  def send(self, message_transport):
+  def send(self, message):
     """
-      :param message_transport: instance of a `MessageTransport`
+      :param message: instance of a `Message`
     """
     # dispatch signal event hook..
     if _signals:
-      delivery_sent.send(message_transport, transporter=self)
+      delivery_sent.send(message, transporter=self)
 
 
 class GAEMailMessageTransporter(MessageTransporter):
   """
   send messages through google app engine's mail api.
   """
-  @classmethod
-  def transport(cls, message):
-    # MessageTransporter.send(self, message)
+  def send(self, message):
+    MessageTransporter.send(self, message)
+    logger.info("telegram: message: %s", message)
     try:
-      headers = {}
+      headers = None
       if message.in_reply_to:
+        headers = {}
         headers["In-Reply-To"] = message.in_reply_to
       if message.references:
+        headers = headers or {}
         headers["References"] = message.references
       rv = mail.EmailMessage(
-        to=message.to,
+        to=message.receiver,
         sender=message.sender,
         subject=message.subject,
         body=message.body_text,
-        html=message.body_html,
-        headers=headers)
+        html=message.body_html)
+        # see: https://code.google.com/p/googleappengine/source/browse/trunk/\
+        # python/google/appengine/api/mail.py#295
+        # the worst fucking line of code i've ever encountered..  why they
+        # would perform argument validation in such a way is really beyond me
+        # headers=headers)
       rv.check_initialized()
       rv.send()
       return rv
     except:
       import traceback as tb
-      logging.exception(
+      logger.exception(
         "exception sending message through app engine mail api: %s",
-        tb.format_ext())
+        tb.format_exc())
+      raise
 
 
 class GAEXMPPMessageTransporter(MessageTransporter):
