@@ -18,7 +18,7 @@ links
 """
 from setuptools import setup
 
-__version__ = "2.0.0"
+__version__ = "0.0.1"
 
 with open("requirements.txt", "r") as f:
   requires = f.readlines()
@@ -40,12 +40,12 @@ setup(
   platforms='any',
   install_requires=requires,
   py_modules=[
-    'flask_telegram',
-    'flask_telegram_tests'
+    "flask_telegram",
+    "flask_telegram_gaemail",
   ],
   tests_require=[
-    'blinker==1.2',
-    'flask_gae_tests==1.0.1',
+    "blinker==1.2",
+    "flask-gae_tests==1.0.1",
   ],
   test_suite='flask_telegram_tests',
   classifiers=[
