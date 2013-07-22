@@ -45,6 +45,3 @@ class GAEMailTransportProvider(telegram.TransportProvider):
     rv.check_initialized()
     rv.send()
     return rv
-
-
-telegram.register_transport_provider(GAEMailTransportProvider)

@@ -186,7 +186,7 @@ class Message(object):
     if not provider:
       provider = flaskapp.config["telegram_transport_provider"]
 
-    transporter = transport_providers[provider]
+    transporter = load_transport_provider(provider)
     msgtransport = MessageTransport(
       sender=sender,
       receiver=receiver,
@@ -265,8 +265,25 @@ transport_providers = {}
 
 def register_transport_provider(provider):
   """
+    :param provider: instance of a `TransportProvider` subclass.
   """
   transport_providers[provider.name] = provider
+
+
+def load_transport_provider(provider_name):
+  """
+    :param provider_name: string name of the transport provider.
+  """
+  if provider_name in transport_providers:
+    return transport_providers[provider_name]
+  short_name = "flask_telegram_{}".format(provider_name)
+  module_name = "flask.ext.telegram_{}".format(provider_name)
+  rv = __import__(module_name, None, None, [short_name])
+  for k, v in rv.__dict__.iteritems():
+    if type(v) is type and (
+      issubclass(v, TransportProvider) and v.name is provider_name):
+      register_transport_provider(v)
+      return v
 
 
 def init_app(flaskapp, **config):
