@@ -19,7 +19,6 @@ import unittest
 import flask
 from flask.ext import gae_tests
 from flask.ext import telegram
-from flask.ext import telegram_gaemail
 from jinja2 import Environment
 from jinja2.loaders import DictLoader
 

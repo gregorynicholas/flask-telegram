@@ -45,7 +45,7 @@ setup(
   ],
   tests_require=[
     "blinker==1.2",
-    "flask_gae_tests==1.0.1",
+    "flask-gae_tests==1.0.1",
   ],
   test_suite='flask_telegram_tests',
   classifiers=[

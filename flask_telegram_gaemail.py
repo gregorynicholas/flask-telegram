@@ -44,4 +44,3 @@ class GAEMailTransportProvider(telegram.TransportProvider):
       # headers=headers)
     rv.check_initialized()
     rv.send()
-    return rv

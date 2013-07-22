@@ -11,35 +11,16 @@
   :copyright: (c) by gregorynicholas.
   :license: MIT, see LICENSE for more details.
 """
-try:
-  # a shitty hack to see if the app engine sdk is loaded..
-  import dev_appserver
-  dev_appserver.fix_sys_path()
-except ImportError:
-  pass
-
-_has_signals = False
-try:
-  import blinker
-  _has_signals = True
-except ImportError:
-  _has_signals = False
-
 from flask import current_app
+from flask.signals import Namespace
 from logging import getLogger
-from google.appengine.api import mail
 from google.appengine.ext import deferred
 
 
 __all__ = [
-  "MessageTemplateMixin", "Message", "TransportProviders", "init_app",
-  "register_transport_provider"]
+  "MessageTemplateMixin", "Message", "init_app", "transport_providers",
+  "delivery_dispatched", "delivery_sent"]
 logger = getLogger(__name__)
-
-
-class MissingBodyTemplateError(ValueError):
-  """
-  """
 
 
 class MessageTemplateMixin(object):
@@ -128,14 +109,6 @@ class MessageTemplateMixin(object):
     return self._render(self.body_html_template, context)
 
 
-class TransportProviders(object):
-  """
-  enum for the different services to send a message.
-  """
-  #:
-  FLASKFLASH = "flaskflash"
-
-
 class Message(object):
   """
   base class for a mesasage to send.
@@ -164,7 +137,7 @@ class Message(object):
       :param sender: string address of the sender
       :param in_reply_to: string id of a conversation thread to reference
       :param references: reference of a conversation thread
-      :param provider: enum of the TransportProviders to transport a message
+      :param provider: string name of the `TransportProvider`
       :param **context: dict of replacements to set for the message being sent,
         if one or more required paramaters for the template specified is
         missing, raises a `ValueError`
@@ -202,8 +175,7 @@ class Message(object):
       receiver, sender, ctx, transporter, msgtransport)
 
     # dispatch signal event hook..
-    if _has_signals:
-      delivery_dispatched.send(msgtransport, transporter=transporter)
+    delivery_dispatched.send(msgtransport, transporter=transporter)
 
     if send_as_task:
       #: string name of the taskqueue
@@ -248,8 +220,7 @@ class TransportProvider(object):
       :param msgtransport: instance of a `MessageTransport`
     """
     # dispatch signal event hook..
-    if _has_signals:
-      delivery_sent.send(msgtransport, transporter=self)
+    delivery_sent.send(msgtransport, transporter=self)
     self.send(msgtransport)
 
   def send(self, msgtransport):
@@ -306,16 +277,15 @@ def init_app(flaskapp, **config):
 
 
 # signals event hooks..
-if _has_signals:
-  signals = blinker.Namespace()
+signals = Namespace()
 
-  #:
-  delivery_dispatched = signals.signal("delivery-dispatched", doc="""
-  signal sent when a message delivery is dispatched.
-  """)
+#:
+delivery_dispatched = signals.signal("delivery-dispatched", doc="""
+signal sent when a message delivery is dispatched.
+""")
 
-  #:
-  delivery_sent = signals.signal("delivery-sent", doc="""
-  signal sent when a message delivery is sent. This signal will also be sent
-  in testing mode, even though the message will not actually be sent.
-  """)
+#:
+delivery_sent = signals.signal("delivery-sent", doc="""
+signal sent when a message delivery is sent. This signal will also be sent
+in testing mode, even though the message will not actually be sent.
+""")
