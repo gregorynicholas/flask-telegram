@@ -11,38 +11,16 @@
   :copyright: (c) by gregorynicholas.
   :license: MIT, see LICENSE for more details.
 """
-try:
-  # a shitty hack to see if the app engine sdk is loaded..
-  import yaml
-except ImportError:
-  import dev_appserver
-  dev_appserver.fix_sys_path()
-
-_signals = False
-try:
-  import blinker
-  _signals = True
-except ImportError:
-  _signals = False
-
+from flask import current_app
+from flask.signals import Namespace
 from logging import getLogger
-from jinja2 import Template
-from google.appengine.api import mail
 from google.appengine.ext import deferred
-# from google.appengine.api import xmpp
 
 
-__all__ = ["MessageTemplateMixin", "Message", "DeliveryMethod"]
+__all__ = [
+  "MessageTemplateMixin", "Message", "init_app", "transport_providers",
+  "delivery_dispatched", "delivery_sent"]
 logger = getLogger(__name__)
-
-
-#:
-TASKQUEUE_NAME = "default"
-
-
-class MissingBodyTemplateError(ValueError):
-  """
-  """
 
 
 class MessageTemplateMixin(object):
@@ -50,33 +28,33 @@ class MessageTemplateMixin(object):
   mixin class for the data model representing message templates.
 
     :param sender: string address of the sender
-    :param subject: string contents of a `jinja2.Template`
-    :param body_html: string contents of a `jinja2.Template`
-    :param body_text: string contents of a `jinja2.Template`
+    :param subject_template: instance of a `jinja2.Template`
+    :param body_html_template: instance of a `jinja2.Template`
+    :param body_text_template: instance of a `jinja2.Template`
     :param jinja_env: instance of `jinja2.Environment`
+    :param context: template context
   """
 
   def __init__(
-    self, sender, subject, body_html, body_text,
-    jinja_env=None, *args, **kwargs):
+    self, sender, subject_template, body_html_template, body_text_template,
+    jinja_env=None, context=None):
     """
       :param sender: string address of the sender
-      :param subject: string contents of a `jinja2.Template`
-      :param body_html: string contents of a `jinja2.Template`
-      :param body_text: string contents of a `jinja2.Template`
+      :param subject: string name of a `jinja2.Template`
+      :param body_html_template: string name of a `jinja2.Template`
+      :param body_text_template: string name of a `jinja2.Template`
       :param jinja_env: instance of `jinja2.Environment`
+      :param context: template context
     """
-    self.jinja_env = jinja_env
-    self._sender = sender
-    self._subject_template = self.jinja_env.get_template(subject)
-    self._body_html_template = self.jinja_env.get_template(body_html)
-    self._body_text_template = self.jinja_env.get_template(body_text)
+    flaskapp = current_app._get_current_object()
+    template_folder = flaskapp.config.get("telegram_template_folder", "")
 
-    if not (
-      isinstance(self._body_html_template, Template) or
-      isinstance(self._body_text_template, Template)):
-      raise MissingBodyTemplateError(
-        "MessageTemplate must have either html or text body template.")
+    self.jinja_env = jinja_env or flaskapp.jinja_env
+    self.context = context or {}
+    self._sender = sender
+    self._subject_template = template_folder + subject_template
+    self._body_html_template = template_folder + body_html_template
+    self._body_text_template = template_folder + body_text_template
 
   @property
   def sender(self):
@@ -90,28 +68,28 @@ class MessageTemplateMixin(object):
     """
       :returns: instance of `jinja2.Template`
     """
-    return self._subject_template
+    return self.jinja_env.get_template(self._subject_template)
 
   @property
   def body_html_template(self):
     """
       :returns: instance of `jinja2.Template`
     """
-    return self._body_html_template
+    return self.jinja_env.get_template(self._body_html_template)
 
   @property
   def body_text_template(self):
     """
       :returns: instance of `jinja2.Template`
     """
-    return self._body_text_template
+    return self.jinja_env.get_template(self._body_text_template)
 
   def _render(self, template, ctx):
     """
     calls the render method on a jinja2 template, and returns the result.
 
       :param template: instance of `jinja2.Template`
-      :param **ctx: dict of replacements
+      :param ctx: dict of replacements
     """
     return template.render(**ctx).encode("utf-8")
 
@@ -129,22 +107,6 @@ class MessageTemplateMixin(object):
     """
     """
     return self._render(self.body_html_template, context)
-
-
-class DeliveryMethod(object):
-  """
-  enum for the different methods to send a message.
-  """
-  #:
-  FLASKFLASH = 10
-  #:
-  SMS = 20
-  #:
-  GAEXMPP = 30
-  #:
-  GAEMAIL = 31
-  #:
-  SENDGRID = 50
 
 
 class Message(object):
@@ -167,8 +129,7 @@ class Message(object):
 
   def deliver(
     self, receiver, sender=None, in_reply_to=None, references=None,
-    method=DeliveryMethod.GAEMAIL, as_task=True, taskqueue=TASKQUEUE_NAME,
-    **context):
+    provider=None, **context):
     """
     deliver message to a recipient.
 
@@ -176,9 +137,7 @@ class Message(object):
       :param sender: string address of the sender
       :param in_reply_to: string id of a conversation thread to reference
       :param references: reference of a conversation thread
-      :param method: enum of the DeliveryMethod to transport a message
-      :param as_task: boolean flag to send through app engine's taskqueue api
-      :param taskqueue: string for the taskqueue name
+      :param provider: string name of the `TransportProvider`
       :param **context: dict of replacements to set for the message being sent,
         if one or more required paramaters for the template specified is
         missing, raises a `ValueError`
@@ -186,38 +145,49 @@ class Message(object):
     if sender is None:
       sender = self.template.sender
 
-    transporter = method_to_transporter_mapping[method]()
+    # get config values defined in the flask app..
+    flaskapp = current_app._get_current_object()
+    #: boolean flag to send through app engine's taskqueue api
+    send_as_task = flaskapp.config["telegram_send_as_task"]
 
-    rv = MessageTransport(
+    # merge the contexts..
+    ctx = {}
+    ctx.update(flaskapp.config["telegram_context"])
+    ctx.update(self.template.context)
+    ctx.update(context)
+
+    if not provider:
+      provider = flaskapp.config["telegram_transport_provider"]
+
+    transporter = load_transport_provider(provider)
+    msgtransport = MessageTransport(
       sender=sender,
       receiver=receiver,
-      subject=self.template.render_subject(context),
-      body_text=self.template.render_body_text(context),
-      body_html=self.template.render_body_html(context),
+      subject=self.subject(ctx),
+      body_text=self.body_text(ctx),
+      body_html=self.body_html(ctx),
       in_reply_to=in_reply_to,
-      references=references,
-      context=context,
-      as_task=as_task,
-      taskqueue=taskqueue)
+      references=references)
 
-    logger.info(
-      "telegram.deliver: transorter: %s, receiver: %s, sender: %s, "
-      "context: %s, rv: %s",
-      transporter, receiver, sender, context, rv)
+    logger.debug(
+      "telegram.deliver: receiver: %s, sender: %s, ctx: %s, "
+      "transorter: %s, msgtransport: %s",
+      receiver, sender, ctx, transporter, msgtransport)
 
     # dispatch signal event hook..
-    if _signals:
-      delivery_dispatched.send(rv, transporter=transporter)
+    delivery_dispatched.send(msgtransport, transporter=transporter)
 
-    if as_task:
-      deferred.defer(transporter.send, rv, _queue=taskqueue)
+    if send_as_task:
+      #: string name of the taskqueue
+      taskqueue_name = flaskapp.config["telegram_taskqueue_name"]
+      deferred.defer(transporter, msgtransport, _queue=taskqueue_name)
     else:
-      transporter.send(rv)
+      transporter(msgtransport)
 
 
 class MessageTransport(object):
   """
-  class for a captured result of a message delivery dispatch.
+  class for a captured result of a message delivery.
 
     :param sender: string address of the sender
     :param receiver: string address of the recipient
@@ -226,13 +196,10 @@ class MessageTransport(object):
     :param body_html: string html body of the message
     :param in_reply_to: string id of a conversation thread to reference
     :param references: reference of a conversation thread
-    :param context:  dict of replacements to set for the message being sent
-    :param as_task: boolean flag to send through app engine's taskqueue api
-    :param taskqueue: string name of the taskqueue
   """
   def __init__(
     self, sender, receiver, subject, body_html, body_text,
-    in_reply_to, references, context, as_task, taskqueue):
+    in_reply_to, references):
     self.sender = sender
     self.receiver = receiver
     self.subject = subject
@@ -240,117 +207,85 @@ class MessageTransport(object):
     self.body_text = body_text
     self.in_reply_to = in_reply_to
     self.references = references
-    self.context = context
-    self.as_task = as_task
-    self.taskqueue = taskqueue
 
 
-class MessageTransporter(object):
+class TransportProvider(object):
   """
-  abstract class interface to transport a message.
+  base class to transport a message.
   """
+  name = ""
 
-  def send(self, message):
+  def __call__(self, msgtransport):
     """
-      :param message: instance of a `Message`
+      :param msgtransport: instance of a `MessageTransport`
     """
     # dispatch signal event hook..
-    if _signals:
-      delivery_sent.send(message, transporter=self)
+    delivery_sent.send(msgtransport, transporter=self)
+    self.send(msgtransport)
 
-
-class GAEMailMessageTransporter(MessageTransporter):
-  """
-  send messages through google app engine's mail api.
-  """
-  def send(self, message):
-    MessageTransporter.send(self, message)
-    logger.info("telegram: message: %s", message)
-    try:
-      headers = None
-      if message.in_reply_to:
-        headers = {}
-        headers["In-Reply-To"] = message.in_reply_to
-      if message.references:
-        headers = headers or {}
-        headers["References"] = message.references
-      rv = mail.EmailMessage(
-        to=message.receiver,
-        sender=message.sender,
-        subject=message.subject,
-        body=message.body_text,
-        html=message.body_html)
-        # see: https://code.google.com/p/googleappengine/source/browse/trunk/\
-        # python/google/appengine/api/mail.py#295
-        # the worst fucking line of code i've ever encountered..  why they
-        # would perform argument validation in such a way is really beyond me
-        # headers=headers)
-      rv.check_initialized()
-      rv.send()
-      return rv
-    except:
-      import traceback as tb
-      logger.exception(
-        "exception sending message through app engine mail api: %s",
-        tb.format_exc())
-      raise
-
-
-class GAEXMPPMessageTransporter(MessageTransporter):
-  """
-  send a message through google app engine's xmpp api.
-  """
-  def send(self, message):
-    MessageTransporter.send(self, message)
-    raise NotImplemented()
-
-
-class SendgridMessageTransporter(MessageTransporter):
-  """
-  """
-  def send(self, message):
-    MessageTransporter.send(self, message)
-    raise NotImplemented()
-
-
-class SMSMessageTransporter(MessageTransporter):
-  """
-  send a message through sms.
-  """
-  def send(self, message):
-    MessageTransporter.send(self, message)
-    raise NotImplemented()
-
-
-class FlaskFlashMessageTransporter(MessageTransporter):
-  """
-  """
-  def send(self, message):
-    MessageTransporter.send(self, message)
-    raise NotImplemented()
+  def send(self, msgtransport):
+    """
+      :param msgtransport: instance of a `MessageTransport`
+    """
+    raise NotImplementedError("subclass must implement the send method.")
 
 
 #:
-method_to_transporter_mapping = {
-  DeliveryMethod.FLASKFLASH: FlaskFlashMessageTransporter,
-  DeliveryMethod.SMS: SMSMessageTransporter,
-  DeliveryMethod.GAEMAIL: GAEMailMessageTransporter,
-  DeliveryMethod.GAEXMPP: GAEXMPPMessageTransporter,
-  DeliveryMethod.SENDGRID: SendgridMessageTransporter,
-}
+transport_providers = {}
+
+
+def register_transport_provider(provider):
+  """
+    :param provider: instance of a `TransportProvider` subclass.
+  """
+  transport_providers[provider.name] = provider
+
+
+def load_transport_provider(provider_name):
+  """
+    :param provider_name: string name of the transport provider.
+  """
+  if provider_name in transport_providers:
+    return transport_providers[provider_name]
+  short_name = "flask_telegram_{}".format(provider_name)
+  module_name = "flask.ext.telegram_{}".format(provider_name)
+  rv = __import__(module_name, None, None, [short_name])
+  for k, v in rv.__dict__.iteritems():
+    if type(v) is type and (
+      issubclass(v, TransportProvider) and v.name is provider_name):
+      register_transport_provider(v)
+      return v
+
+
+def init_app(flaskapp, **config):
+  """
+  configures a flask application.
+
+    :param flaskapp:
+    :param config:
+  """
+  template_folder = "{}{}".format(
+    flaskapp.config.get("template_folder", ""),
+    config.pop("template_folder", ""))
+  flaskapp.config.setdefault("telegram_template_folder", template_folder)
+  flaskapp.config.setdefault("telegram_context", {})
+  flaskapp.config.setdefault("telegram_send_as_task", True)
+  flaskapp.config.setdefault("telegram_taskqueue_name", "default")
+  flaskapp.config.setdefault("telegram_transport_provider", "gaemail")
+  for k, v in config.iteritems():
+    flaskapp.config.setdefault("telegram_" + k, v)
 
 
 # signals event hooks..
-if _signals:
-  signals = blinker.Namespace()
+signals = Namespace()
 
-  #:
-  delivery_dispatched = signals.signal("delivery-dispatched", doc="""
-  signal sent when a message delivery is dispatched.
-  """)
+#:
+delivery_dispatched = signals.signal("delivery-dispatched", doc="""
+signal sent when a message delivery is dispatched.
+""")
 
-  #:
-  delivery_sent = signals.signal("delivery-sent", doc="""
-  signal sent when a message delivery is sent. This signal will also be sent
-  in testing mode, even though the message will not actually be sent.
-  """)
+#:
+delivery_sent = signals.signal("delivery-sent", doc="""
+signal sent when a message delivery is sent. This signal will also be sent
+in testing mode, even though the message will not actually be sent.
+""")
