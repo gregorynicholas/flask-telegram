@@ -11,10 +11,14 @@
   :copyright: (c) by gregorynicholas.
   :license: MIT, see LICENSE for more details.
 """
+from __future__ import unicode_literals
+import os
+# set the python runtime to 2.7 for the deferred lib wants to default to
+# webapp25 with webob..
+os.environ.setdefault("APPENGINE_RUNTIME", "python27")
 from flask import current_app
 from flask.signals import Namespace
 from logging import getLogger
-from google.appengine.ext import deferred
 
 
 __all__ = [
@@ -46,15 +50,12 @@ class MessageTemplateMixin(object):
       :param jinja_env: instance of `jinja2.Environment`
       :param context: template context
     """
-    flaskapp = current_app._get_current_object()
-    template_folder = flaskapp.config.get("telegram_template_folder", "")
-
-    self.jinja_env = jinja_env or flaskapp.jinja_env
+    self.jinja_env = jinja_env
     self.context = context or {}
     self._sender = sender
-    self._subject_template = template_folder + subject_template
-    self._body_html_template = template_folder + body_html_template
-    self._body_text_template = template_folder + body_text_template
+    self._subject_template = subject_template
+    self._body_html_template = body_html_template
+    self._body_text_template = body_text_template
 
   @property
   def sender(self):
@@ -68,21 +69,31 @@ class MessageTemplateMixin(object):
     """
       :returns: instance of `jinja2.Template`
     """
-    return self.jinja_env.get_template(self._subject_template)
+    return self.get_template(self._subject_template)
 
   @property
   def body_html_template(self):
     """
       :returns: instance of `jinja2.Template`
     """
-    return self.jinja_env.get_template(self._body_html_template)
+    return self.get_template(self._body_html_template)
 
   @property
   def body_text_template(self):
     """
       :returns: instance of `jinja2.Template`
     """
-    return self.jinja_env.get_template(self._body_text_template)
+    return self.get_template(self._body_text_template)
+
+  def get_template(self, template_file):
+    """
+      :param template_file:
+    """
+    flaskapp = current_app._get_current_object()
+    jinja_env = self.jinja_env or flaskapp.jinja_env
+    template_folder = flaskapp.config.get("telegram_template_folder", "")
+    return jinja_env.get_template(
+      os.path.join(template_folder + self._body_html_template))
 
   def _render(self, template, ctx):
     """
@@ -128,12 +139,12 @@ class Message(object):
     return self.template.render_body_text(context)
 
   def deliver(
-    self, receiver, sender=None, in_reply_to=None, references=None,
+    self, recipient, sender=None, in_reply_to=None, references=None,
     provider=None, **context):
     """
     deliver message to a recipient.
 
-      :param receiver: string address of the recipient
+      :param recipient: string address of the recipient
       :param sender: string address of the sender
       :param in_reply_to: string id of a conversation thread to reference
       :param references: reference of a conversation thread
@@ -155,6 +166,8 @@ class Message(object):
     ctx.update(flaskapp.config["telegram_context"])
     ctx.update(self.template.context)
     ctx.update(context)
+    ctx["sender"] = sender
+    ctx["recipient"] = recipient
 
     if not provider:
       provider = flaskapp.config["telegram_transport_provider"]
@@ -162,7 +175,7 @@ class Message(object):
     transporter = load_transport_provider(provider)
     msgtransport = MessageTransport(
       sender=sender,
-      receiver=receiver,
+      recipient=recipient,
       subject=self.subject(ctx),
       body_text=self.body_text(ctx),
       body_html=self.body_html(ctx),
@@ -170,14 +183,15 @@ class Message(object):
       references=references)
 
     logger.debug(
-      "telegram.deliver: receiver: %s, sender: %s, ctx: %s, "
+      "telegram.deliver: recipient: %s, sender: %s, ctx: %s, "
       "transorter: %s, msgtransport: %s",
-      receiver, sender, ctx, transporter, msgtransport)
+      recipient, sender, ctx, transporter, msgtransport)
 
     # dispatch signal event hook..
     delivery_dispatched.send(msgtransport, transporter=transporter)
 
     if send_as_task:
+      from google.appengine.ext import deferred
       #: string name of the taskqueue
       taskqueue_name = flaskapp.config["telegram_taskqueue_name"]
       deferred.defer(transporter, msgtransport, _queue=taskqueue_name)
@@ -190,7 +204,7 @@ class MessageTransport(object):
   class for a captured result of a message delivery.
 
     :param sender: string address of the sender
-    :param receiver: string address of the recipient
+    :param recipient: string address of the recipient
     :param subject: string subject of the message
     :param body_text: string plain text body of the message
     :param body_html: string html body of the message
@@ -198,10 +212,10 @@ class MessageTransport(object):
     :param references: reference of a conversation thread
   """
   def __init__(
-    self, sender, receiver, subject, body_html, body_text,
+    self, sender, recipient, subject, body_html, body_text,
     in_reply_to, references):
     self.sender = sender
-    self.receiver = receiver
+    self.recipient = recipient
     self.subject = subject
     self.body_html = body_html
     self.body_text = body_text
@@ -250,11 +264,11 @@ def load_transport_provider(provider_name):
   short_name = "flask_telegram_{}".format(provider_name)
   module_name = "flask.ext.telegram_{}".format(provider_name)
   rv = __import__(module_name, None, None, [short_name])
-  for k, v in rv.__dict__.iteritems():
-    if type(v) is type and (
-      issubclass(v, TransportProvider) and v.name is provider_name):
+  for k, v in [_ for _ in rv.__dict__.iteritems() if type(_[1]) is type]:
+    if issubclass(v, TransportProvider) and v.name == provider_name:
       register_transport_provider(v)
       return v
+  raise ValueError("provider not found: %s", provider_name)
 
 
 def init_app(flaskapp, **config):

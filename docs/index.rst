@@ -47,16 +47,16 @@ example usage
       jinja_env=jinjaenv)
 
     # now let's assume you want to batch message recipients..
-    receivers = ["r1@domain.com", "r2@domain.com", "r3@domain.com"]
+    recipients = ["r1@domain.com", "r2@domain.com", "r3@domain.com"]
 
-    for receiver in receivers:
+    for recipient in recipients:
       context = {
         "var_subject": "telegram'd subject",
         "var_html_body": "telegram'd html body",
         "var_text_body": "telegram'd text body"}
 
       message = telegram.Message(messagetemplate)
-      message.deliver(receiver=receiver, **context)`
+      message.deliver(recipient=recipient, **context)`
 
 
 api
@@ -79,11 +79,11 @@ api
 
    .. automethod:: __init__(template)
 
-   .. automethod:: deliver(receiver, sender, in_reply_to, method=Method.GAEMAIL, as_task=True, taskqueue=TASKQUEUE_NAME, **context)
+   .. automethod:: deliver(recipient, sender, in_reply_to, method=Method.GAEMAIL, as_task=True, taskqueue=TASKQUEUE_NAME, **context)
 
 
 .. autoclass:: MessageTransport
-    :members: sender, receiver, subject, body_html, body_text, in_reply_to, references, context, as_task, taskqueue
+    :members: sender, recipient, subject, body_html, body_text, in_reply_to, references, context, as_task, taskqueue
 
 
 .. autoclass:: MessageTransporter

@@ -1,30 +1,22 @@
 #!/usr/bin/env python
 """
 flask-telegram
-~~~~~~~~~~~~~~
 
 flask extension for delivering messages. send via the app engine mail or xmpp
 apis, and/or other third party providers such as sendgrid.
 
 
-links
-`````
+links:
 
-* `docs <http://gregorynicholas.github.io/flask-telegram>`_
-* `source <http://github.com/gregorynicholas/flask-telegram>`_
-* `package <http://packages.python.org/flask-telegram>`_
-* `travis-ci <http://travis-ci.org/gregorynicholas/flask-telegram>`_
+* docs: http://gregorynicholas.github.io/flask-telegram
+* source: http://github.com/gregorynicholas/flask-telegram
+* package: http://packages.python.org/flask-telegram
+* travis-ci: http://travis-ci.org/gregorynicholas/flask-telegram
 
 """
 from setuptools import setup
 
 __version__ = "0.0.1"
-
-with open("requirements.txt", "r") as f:
-  requires = f.readlines()
-
-with open("README.md", "r") as f:
-  long_description = f.readlines()
 
 
 setup(
@@ -35,10 +27,14 @@ setup(
   author='gregorynicholas',
   author_email='gn@gregorynicholas.com',
   description=__doc__,
-  long_description=long_description,
+  long_description=__doc__,
   zip_safe=False,
   platforms='any',
-  install_requires=requires,
+  install_requires=[
+    "flask==0.9",
+    "werkzeug==0.8.3",
+    "blinker==1.2",
+  ],
   py_modules=[
     "flask_telegram",
     "flask_telegram_gaemail",
