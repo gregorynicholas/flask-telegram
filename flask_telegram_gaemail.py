@@ -32,7 +32,7 @@ class GAEMailTransportProvider(telegram.TransportProvider):
       headers["References"] = msgtransport.references
 
     rv = mail.EmailMessage(
-      to=msgtransport.receiver,
+      to=msgtransport.recipient,
       sender=msgtransport.sender,
       subject=msgtransport.subject,
       body=msgtransport.body_text,
