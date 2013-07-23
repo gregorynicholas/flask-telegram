@@ -4,12 +4,12 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~
 
 """
-# avoid webapp25 imports.. fucking gae..
+from __future__ import unicode_literals
+
+# avoid webapp25 imports from the deferred lib.. fucking gae..
 import os
 os.environ["APPENGINE_RUNTIME"] = "python27"
-
 try:
-  # hack to see if the app engine sdk is loaded..
   import dev_appserver
   dev_appserver.fix_sys_path()
 except ImportError:
@@ -63,7 +63,7 @@ class TestCase(gae_tests.TestCase):
     message = telegram.Message(messagetemplate)
 
     message.deliver(
-      receiver='test@gmail.com',
+      recipient='test@gmail.com',
       var="testing")
 
     self.assertTasksInQueue(1)
