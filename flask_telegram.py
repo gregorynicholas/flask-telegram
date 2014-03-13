@@ -92,8 +92,10 @@ class MessageTemplateMixin(object):
     flaskapp = current_app._get_current_object()
     jinja_env = self.jinja_env or flaskapp.jinja_env
     template_folder = flaskapp.config.get("telegram_template_folder", "")
-    return jinja_env.get_template(
-      os.path.join(template_folder + self._body_html_template))
+    rv = jinja_env.get_template(
+      os.path.join(template_folder + self._body_html_template),
+      globals=self.context)
+    return rv
 
   def _render(self, template, ctx):
     """
@@ -128,6 +130,7 @@ class Message(object):
   """
   def __init__(self, template):
     self.template = template
+    self.build_context()
 
   def subject(self, context):
     return self.template.render_subject(context)
@@ -137,6 +140,13 @@ class Message(object):
 
   def body_text(self, context):
     return self.template.render_body_text(context)
+
+  def build_context(self):
+    flaskapp = current_app._get_current_object()
+    ctx = flaskapp.config["telegram_context"]
+    if self.template.context:
+      ctx.update(self.template.context)
+    self.template.context = ctx
 
   def deliver(
     self, recipient, sender=None, in_reply_to=None, references=None,
@@ -162,12 +172,10 @@ class Message(object):
     send_as_task = flaskapp.config["telegram_send_as_task"]
 
     # merge the contexts..
-    ctx = {}
-    ctx.update(flaskapp.config["telegram_context"])
-    ctx.update(self.template.context)
-    ctx.update(context)
-    ctx["sender"] = sender
-    ctx["recipient"] = recipient
+    if context is None:
+      context = {}
+    context['sender'] = sender
+    context['recipient'] = recipient
 
     if not provider:
       provider = flaskapp.config["telegram_transport_provider"]
@@ -176,16 +184,16 @@ class Message(object):
     msgtransport = MessageTransport(
       sender=sender,
       recipient=recipient,
-      subject=self.subject(ctx),
-      body_text=self.body_text(ctx),
-      body_html=self.body_html(ctx),
+      subject=self.subject(context),
+      body_text=self.body_text(context),
+      body_html=self.body_html(context),
       in_reply_to=in_reply_to,
       references=references)
 
     logger.debug(
-      "telegram.deliver: recipient: %s, sender: %s, ctx: %s, "
+      "telegram.deliver  recipient: %s, sender: %s, context: %s, "
       "transorter: %s, msgtransport: %s",
-      recipient, sender, ctx, transporter, msgtransport)
+      recipient, sender, context, transporter, msgtransport)
 
     # dispatch signal event hook..
     delivery_dispatched.send(msgtransport, transporter=transporter)
