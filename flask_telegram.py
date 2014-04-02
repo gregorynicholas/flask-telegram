@@ -107,7 +107,6 @@ class MessageTemplateMixin(object):
   def render_subject(self, context):
     """
     """
-    # return "your unvael beta invite code."
     return self._render(self.subject_template, context)
 
   def render_body_text(self, context):
@@ -179,13 +178,11 @@ class Message(object):
     if not provider:
       provider = flaskapp.config["telegram_transport_provider"]
 
-    subj = self.subject(context)
-
     transporter = load_transport_provider(provider)
     msgtransport = MessageTransport(
       sender=sender,
       recipient=recipient,
-      subject=subj,
+      subject=self.subject(context),
       body_text=self.body_text(context),
       body_html=self.body_html(context),
       in_reply_to=in_reply_to,
