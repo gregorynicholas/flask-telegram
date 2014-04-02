@@ -24,7 +24,7 @@ from logging import getLogger
 __all__ = [
   "MessageTemplateMixin", "Message", "init_app", "transport_providers",
   "delivery_dispatched", "delivery_sent"]
-logger = getLogger(__name__)
+log = getLogger(__name__)
 
 
 class MessageTemplateMixin(object):
@@ -92,8 +92,8 @@ class MessageTemplateMixin(object):
     flaskapp = current_app._get_current_object()
     jinja_env = self.jinja_env or flaskapp.jinja_env
     template_folder = flaskapp.config.get("telegram_template_folder", "")
-    return jinja_env.get_template(
-      os.path.join(template_folder + self._body_html_template))
+    path = os.path.join(template_folder, template_file)
+    return jinja_env.get_template(path, globals=self.context)
 
   def _render(self, template, ctx):
     """
@@ -107,6 +107,7 @@ class MessageTemplateMixin(object):
   def render_subject(self, context):
     """
     """
+    # return "your unvael beta invite code."
     return self._render(self.subject_template, context)
 
   def render_body_text(self, context):
@@ -128,6 +129,7 @@ class Message(object):
   """
   def __init__(self, template):
     self.template = template
+    self.build_context()
 
   def subject(self, context):
     return self.template.render_subject(context)
@@ -137,6 +139,13 @@ class Message(object):
 
   def body_text(self, context):
     return self.template.render_body_text(context)
+
+  def build_context(self):
+    flaskapp = current_app._get_current_object()
+    ctx = flaskapp.config.get("telegram_context", {})
+    if self.template.context:
+      ctx.update(self.template.context)
+    self.template.context = ctx
 
   def deliver(
     self, recipient, sender=None, in_reply_to=None, references=None,
@@ -159,33 +168,33 @@ class Message(object):
     # get config values defined in the flask app..
     flaskapp = current_app._get_current_object()
     #: boolean flag to send through app engine's taskqueue api
-    send_as_task = flaskapp.config["telegram_send_as_task"]
+    send_as_task = flaskapp.config.get("telegram_send_as_task")
 
     # merge the contexts..
-    ctx = {}
-    ctx.update(flaskapp.config["telegram_context"])
-    ctx.update(self.template.context)
-    ctx.update(context)
-    ctx["sender"] = sender
-    ctx["recipient"] = recipient
+    if context is None:
+      context = {}
+    context['sender'] = sender
+    context['recipient'] = recipient
 
     if not provider:
       provider = flaskapp.config["telegram_transport_provider"]
+
+    subj = self.subject(context)
 
     transporter = load_transport_provider(provider)
     msgtransport = MessageTransport(
       sender=sender,
       recipient=recipient,
-      subject=self.subject(ctx),
-      body_text=self.body_text(ctx),
-      body_html=self.body_html(ctx),
+      subject=subj,
+      body_text=self.body_text(context),
+      body_html=self.body_html(context),
       in_reply_to=in_reply_to,
       references=references)
 
-    logger.debug(
-      "telegram.deliver: recipient: %s, sender: %s, ctx: %s, "
+    log.debug(
+      "telegram.deliver  recipient: %s, sender: %s, context: %s, "
       "transorter: %s, msgtransport: %s",
-      recipient, sender, ctx, transporter, msgtransport)
+      recipient, sender, context, transporter, msgtransport)
 
     # dispatch signal event hook..
     delivery_dispatched.send(msgtransport, transporter=transporter)
@@ -193,8 +202,9 @@ class Message(object):
     if send_as_task:
       from google.appengine.ext import deferred
       #: string name of the taskqueue
-      taskqueue_name = flaskapp.config["telegram_taskqueue_name"]
-      deferred.defer(transporter, msgtransport, _queue=taskqueue_name)
+      queue_name = flaskapp.config.get(
+        "telegram_taskqueue_name", 'default')
+      deferred.defer(transporter, msgtransport, _queue=queue_name)
     else:
       transporter(msgtransport)
 
@@ -229,7 +239,7 @@ class TransportProvider(object):
   """
   name = ""
 
-  def __call__(self, msgtransport):
+  def __init__(self, msgtransport):
     """
       :param msgtransport: instance of a `MessageTransport`
     """
@@ -286,8 +296,7 @@ def init_app(flaskapp, **config):
   flaskapp.config.setdefault("telegram_send_as_task", True)
   flaskapp.config.setdefault("telegram_taskqueue_name", "default")
   flaskapp.config.setdefault("telegram_transport_provider", "gaemail")
-  for k, v in config.iteritems():
-    flaskapp.config.setdefault("telegram_" + k, v)
+  flaskapp.config.update(config)
 
 
 # signals event hooks..
