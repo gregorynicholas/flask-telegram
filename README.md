@@ -1,33 +1,46 @@
 flask-telegram
 ==============
 
-
 [flask](http://flask.pocoo.org) extension for delivering messages.
-send via google [app engine's](http://appengine.google.com) mail or xmpp
-apis, and/or other third party providers such as
-[sendgrid](http://sendgrid.com).
 
-[![Build Status](https://secure.travis-ci.org/gregorynicholas/flask-telegram.png?branch=master)](https://travis-ci.org/gregorynicholas/flask-telegram)
+send using [google app-engine](http://appengine.google.com) `mail` or `xmpp` apis,
+and/or other third party providers such as [sendgrid](http://sendgrid.com)
 
 
-* [docs](http://gregorynicholas.github.io/flask-telegram)
+<br>
+**build-status:**
+
+`master ` [![travis-ci build-status: master](https://secure.travis-ci.org/gregorynicholas/flask-telegram.svg?branch=master)](https://travis-ci.org/gregorynicholas/flask-telegram)
+<br>
+`develop` [![travis-ci build-status: develop](https://secure.travis-ci.org/gregorynicholas/flask-telegram.svg?branch=develop)](https://travis-ci.org/gregorynicholas/flask-telegram)
+
+
+**links:**
+
+* [homepage](http://gregorynicholas.github.io/flask-telegram)
 * [source](http://github.com/gregorynicholas/flask-telegram)
-* [package](http://packages.python.org/flask-telegram)
-* [changelog](https://github.com/gregorynicholas/flask-telegram/blob/master/CHANGES)
+* [python-package](http://packages.python.org/flask-telegram)
+* [github-issues](https://github.com/gregorynicholas/flask-telegram/issues)
+* [changelog](https://github.com/gregorynicholas/flask-telegram/blob/master/CHANGES.md)
 * [travis-ci](http://travis-ci.org/gregorynicholas/flask-telegram)
 
 
+<br>
 -----
+<br>
 
 
 ### getting started
 
-install with *pip*:
 
-    pip install flask-telegram
+install with pip:
+
+    $ pip install flask-telegram
 
 
+<br>
 -----
+<br>
 
 
 ### features
@@ -35,7 +48,9 @@ install with *pip*:
 * [todo]
 
 
+<br>
 -----
+<br>
 
 
 ### example usage
@@ -72,6 +87,7 @@ setup from outside the flask app request context:
 
       message = telegram.Message(messagetemplate)
       message.deliver(recipient=recipient, **context)
+
 
 
 setup from within the flask app request context:

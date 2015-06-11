@@ -4,12 +4,13 @@ python:
   - 2.7
 
 install:
-  - wget https://googleappengine.googlecode.com/files/google_appengine_1.8.1.zip -nv
-  - unzip -q google_appengine_1.8.1.zip
+  - wget https://googleappengine.googlecode.com/files/google_appengine_1.8.9.zip -nv
+  - unzip -q google_appengine_1.8.9.zip
   - export PYTHONPATH=$PYTHONPATH:$PWD/google_appengine
-  - pip install -r requirements.txt
+  - python setup.py install
 
-script: python setup.py test
+script:
+  - python setup.py check clean sdist nosetests
 
 branches:
   only:
