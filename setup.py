@@ -31,7 +31,7 @@ setup(
   zip_safe=False,
   platforms='any',
   install_requires=[
-    "flask==0.9",
+    "flask==1.0",
     "werkzeug==0.8.3",
     "blinker==1.2",
   ],
