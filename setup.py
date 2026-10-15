@@ -32,7 +32,7 @@ setup(
   platforms='any',
   install_requires=[
     "flask==0.9",
-    "werkzeug==0.8.3",
+    "werkzeug==3.1.9",
     "blinker==1.2",
   ],
   py_modules=[
